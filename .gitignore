@@ -5,3 +5,4 @@ vectorstore/
 data/processed/
 *.pyc
 .DS_Store
+whattoremember.txt
