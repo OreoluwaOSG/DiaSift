@@ -1,42 +1,47 @@
-Complications of type 2 diabetes
-Long-term complications of type 2 diabetes
-Having type 2 diabetes increases your chance of getting other long-term health problems, so it's important to get it treated and manage it well.
+NHS Type 2 Diabetes Path to Remission Programme
+The NHS Type 2 Diabetes Path to Remission Programme is a joint initiative between NHS England and Diabetes UK available to eligible people in England.
 
-Other health problems include:
+This programme provides a low calorie, total diet replacement treatment for people who are living with type 2 diabetes and obesity or overweight.
 
-damage to your blood vessels, which can cause coronary heart disease and stroke
-foot problems such as ulcers and infections, which can sometimes result in you needing surgery to remove your foot or leg (an amputation)
-sight problems such as diabetic retinopathy and blindness
-kidney problems
-gum disease
-You can lower your chances of complications by managing your blood glucose (sugar) as well as you can, and by making healthy lifestyle changes such as eating a balanced diet, exercising and not smoking.
+The programme is based on research showing that a 3-month specially formulated diet comprising of total diet replacement products including soups and shakes, followed by healthy lifestyle support helped people living with type 2 diabetes and obesity or overweight to lose over 10kg in weight, improve their blood sugar levels, reduce diabetes-related medication and, in almost half of participants, put their type 2 diabetes into remission. Early data from the programme has shown that weight loss was similar to that seen in the clinical trials.
 
-Important
-It's important to go to all of your diabetes appointments, and make sure you do not miss any tests. Doing this can help find and treat any complications as soon as possible.
+Learning from the programme will help to build knowledge and understanding about the use of interventions such as this and the impact they might have on the treatment of people living with type 2 diabetes in the future.
 
-See a GP or diabetes nurse if:
-you have blisters or cracked skin on your feet
-you have any pain, tingling or numbness in your body, problems having sex, constipation or diarrhoea – these could be signs of nerve damage
-your vision gets worse
-Complications of high blood glucose
-Although it's rare in type 2 diabetes, high blood glucose levels can cause a condition called hyperosmolar hyperglycaemic state (HHS). This can happen over a few weeks and is usually caused by an infection and being dehydrated.
+How it works
+Eligible participants will be offered low calorie, total diet replacement products including soups and shakes consisting of 800 to 900 kilocalories a day for 12 weeks. During this time, participants will replace all normal meals with these products.
 
-If you have high blood glucose levels, a lack of insulin can cause harmful substances called ketones to build up in the blood. This can cause a condition called diabetic ketoacidosis (DKA).
+Alongside this, participants will receive support and monitoring for 12 months including help to re-introduce food after the initial 12-week period. This support will provide participants with the help and advice they need throughout every stage of the programme. Participants will have the choice to receive this support from a coach in-person or digitally. The programme is fully funded by the NHS, therefore there is no cost to participants.
 
-Both HHS and DKA can be life threatening.
+Participants will also be closely supported by their local GP practice – for example, if medicines need to be changed.
 
-Call 999 or go to A&E if:
-You have type 2 diabetes and:
+Who is eligible and how to access the service
+The NHS Type 2 Diabetes Path to Remission Programme will not be suitable for everyone and there are some eligibility requirements that people must meet to be involved. These include that individuals must:
 
-are peeing a lot
-feel very thirsty
-feel sick (nauseous)
-feel confused or very sleepy
-feel drowsy
-get short of breath
-These could be signs of HHS or DKA, which can be life threatening if not treated quickly.
+have a diagnosis of type 2 diabetes within the last 6 years, and
+have a BMI over 27 kg/m2 (where individuals are from White ethnic groups) or over 25 kg/m2 (where individuals are from Black, Asian and other ethnic groups)
+Individuals who are interested in joining the programme can discuss their individual circumstances with their GP or diabetes team at their next appointment to find out whether it is suitable for them.
 
-Find your nearest A&E
-Do not drive to A&E. Ask someone to drive you or call 999 and ask for an ambulance.
+People who are not eligible for the NHS Type 2 Diabetes Path to Remission Programme should discuss their individual circumstances and services that are available to them locally with their GP or diabetes team at their next appointment.
 
-Bring any medicines you take with you.
+Adults living with obesity who also have a diagnosis of diabetes or hypertension or both may be eligible for the NHS Digital Weight Management Programme – a nationally available 12-week online behavioural and lifestyle programme accessed via a smartphone or computer with internet access, following a referral from primary care or community pharmacy.
+
+The studies
+The NHS Type 2 Diabetes Path to Remission Programme is based on two studies.
+
+The Diabetes UK-funded ‘DiRECT’ trial saw almost half of those who went on a low calorie diet achieve remission of their type 2 diabetes after one year. A quarter of participants achieved a 15kg or more weight loss, and of these, 86% put their type 2 diabetes into remission.
+
+Another trial, called ‘DROPLET’, demonstrated similar weight loss in people who were living with obesity.
+
+The details of the trials can be found here:
+
+DiRECT 1-year results
+DiRECT 2-year results
+DiRECT 5-year follow-up results
+DROPLET
+Outcomes
+Early outcomes data, published in The Lancet Diabetes and Endocrinology, shows that of those who completed the programme and had two HbA1c (blood glucose) measurements recorded, 32% had put their type 2 diabetes into remission, with an average weight loss of almost 16kg. This shows that remission of type 2 diabetes is possible at scale through delivery of an NHS service.
+
+Contact
+NHS England will not be able to provide any clinical advice, refer people onto the programme or answer individual questions about eligibility for the programme.
+
+For general enquiries about the programme, please email england.t2diabetesremission@nhs.net
