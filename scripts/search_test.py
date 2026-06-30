@@ -5,6 +5,8 @@ import re
 import chromadb
 from sentence_transformers import SentenceTransformer
 
+from evidence_label import label_evidence_strength
+
 
 # Project folder.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -174,9 +176,21 @@ def search_documents(question: str, number_of_results: int = 5):
 
 def display_results(question: str, results):
     """Print the search results."""
+    evidence = label_evidence_strength(question, results)
+    signals = evidence["signals"]
 
     print("=" * 80)
     print(f"Question: {question}")
+    print(f"Evidence strength: {evidence['label']}")
+    print(f"Evidence reason: {evidence['reason']}")
+    print(f"Should answer directly: {evidence['should_answer']}")
+    print(
+        "Evidence signals: "
+        f"top_score={signals['top_score']:.3f}, "
+        f"average_top_3_score={signals['average_top_3_score']:.3f}, "
+        f"matched_term_ratio={signals['matched_term_ratio']:.3f}, "
+        f"supporting_result_count={signals['supporting_result_count']}"
+    )
     print("=" * 80)
 
     if not results:
