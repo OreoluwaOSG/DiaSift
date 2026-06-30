@@ -5,10 +5,10 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 
 
-# Project folder.
+# This is the project folder.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Chunks created by ingest_documents.py.
+# This are chunks created by ingest_documents.py.
 CHUNKS_FILE = BASE_DIR / "data" / "processed" / "chunks.json"
 
 # Folder for the ChromaDB database.
