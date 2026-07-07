@@ -1,4 +1,5 @@
 from pathlib import Path
+from functools import lru_cache
 import sys
 import re
 
@@ -23,6 +24,8 @@ STOPWORDS = {
     "an",
     "and",
     "are",
+    "define",
+    "does",
     "for",
     "how",
     "in",
@@ -33,9 +36,44 @@ STOPWORDS = {
     "the",
     "to",
     "what",
+    "meaning",
+    "mean",
+    "means",
+    "explain",
 }
 
 
+def normalize_question_text(text: str) -> str:
+    """
+    Normalize common user wording before search.
+
+    This helps when users type things like type2, type-2, or T2D.
+    """
+    normalized = text.lower()
+    normalized = re.sub(r"\btype\s*-?\s*1\b", "type 1", normalized)
+    normalized = re.sub(r"\btype\s*-?\s*2\b", "type 2", normalized)
+    normalized = re.sub(r"\btype1\b", "type 1", normalized)
+    normalized = re.sub(r"\btype2\b", "type 2", normalized)
+    normalized = re.sub(r"\bt1d\b", "type 1 diabetes", normalized)
+    normalized = re.sub(r"\bt2d\b", "type 2 diabetes", normalized)
+    normalized = re.sub(r"\bhba1c\b", "hba1c", normalized)
+    return normalized
+
+
+@lru_cache(maxsize=1)
+def get_embedding_model():
+    """Load the embedding model once per Python process."""
+    try:
+        return SentenceTransformer(EMBEDDING_MODEL_NAME, local_files_only=True)
+    except Exception as error:
+        raise RuntimeError(
+            "The embedding model is not available locally. "
+            "Run scripts/build_index.py once with internet access so the model "
+            "can be downloaded, then start the backend again."
+        ) from error
+
+
+@lru_cache(maxsize=1)
 def load_collection():
     """Load the ChromaDB collection."""
 
@@ -60,13 +98,13 @@ def load_collection():
 
 def tokenize(text: str) -> set[str]:
     """Get the useful words from some text."""
-    words = re.findall(r"[a-z0-9]+", text.lower())
+    words = re.findall(r"[a-z0-9]+", normalize_question_text(text))
     return {word for word in words if word not in STOPWORDS}
 
 
 def is_definition_question(question: str) -> bool:
     """Check if the question is asking for a definition."""
-    question_lower = question.lower().strip()
+    question_lower = normalize_question_text(question).strip()
     return (
         question_lower.startswith("what is ")
         or "define" in question_lower
@@ -74,10 +112,138 @@ def is_definition_question(question: str) -> bool:
     )
 
 
+def get_definition_target(question: str) -> dict:
+    """Get the phrase being defined, such as glucose or type 2 diabetes."""
+    question_lower = normalize_question_text(question).strip()
+
+    patterns = [
+        r"^what is (.+?)[\?\.]?$",
+        r"^what are (.+?)[\?\.]?$",
+        r"^define (.+?)[\?\.]?$",
+        r"^explain (.+?)[\?\.]?$",
+        r"^meaning of (.+?)[\?\.]?$",
+        r"^what does (.+?) mean[\?\.]?$",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, question_lower)
+        if match:
+            phrase = match.group(1).strip()
+            terms = tokenize(phrase)
+            ordered_terms = [
+                word
+                for word in re.findall(r"[a-z0-9]+", phrase)
+                if word in terms
+            ]
+
+            return {
+                "phrase": " ".join(ordered_terms),
+                "terms": terms,
+                "head_term": ordered_terms[-1] if ordered_terms else "",
+            }
+
+    terms = tokenize(question)
+    ordered_terms = [
+        word
+        for word in re.findall(r"[a-z0-9]+", question_lower)
+        if word in terms
+    ]
+
+    return {
+        "phrase": " ".join(ordered_terms),
+        "terms": terms,
+        "head_term": ordered_terms[-1] if ordered_terms else "",
+    }
+
+
+def has_definition_phrase(text: str, phrase: str) -> bool:
+    """Check for wording like 'glucose is' or 'type 2 diabetes means'."""
+    if not phrase:
+        return False
+
+    escaped_phrase = re.escape(phrase)
+    match = re.search(
+        rf"\b{escaped_phrase}\b\s*(\([^)]+\))?\s+"
+        r"(is|are|means|mean|refers to|happens when|is when)\b"
+        r"\s*([a-z0-9]+)?",
+        text,
+    )
+
+    if not match:
+        return False
+
+    next_word = match.group(3) or ""
+
+    # These phrases mention a term but do not define it.
+    non_definition_words = {
+        "available",
+        "eligible",
+        "offered",
+        "possible",
+        "recommended",
+        "used",
+    }
+
+    return next_word not in non_definition_words
+
+
+def calculate_definition_score(document: str, definition_target: dict) -> float:
+    """Score generic definition-style wording without hard-coding one topic."""
+    definition_terms = definition_target["terms"]
+
+    if not definition_terms:
+        return 0
+
+    document_lower = document.lower()
+    first_section = document_lower[:500]
+    phrase = definition_target["phrase"]
+    head_term = definition_target["head_term"]
+    definition_score = 0
+
+    # Prefer exact definition wording near the top of a chunk.
+    if has_definition_phrase(first_section, phrase):
+        definition_score += 2.0
+    elif has_definition_phrase(document_lower, phrase):
+        definition_score += 1.2
+
+    # If the phrase is "type 2 diabetes", a definition of "diabetes" can still
+    # be useful because it defines the broader condition.
+    if head_term and head_term != phrase:
+        if has_definition_phrase(first_section, head_term):
+            definition_score += 1.0
+        elif has_definition_phrase(document_lower, head_term):
+            definition_score += 0.5
+
+    # Prefer chunks where the exact term appears near the start.
+    if phrase and phrase in first_section:
+        definition_score += 0.5
+
+    # Prefer parenthetical definitions such as "glucose (sugar)".
+    if head_term and re.search(rf"\b{re.escape(head_term)}\b\s*\([^)]+\)", document_lower):
+        definition_score += 0.8
+
+    # For definition questions, reduce chunks that are clearly about other
+    # tasks, such as treatment or complications, rather than defining the term.
+    first_line = document_lower.splitlines()[0] if document_lower.splitlines() else ""
+    if first_line.startswith(
+        (
+            "treatment",
+            "complications",
+            "appointments",
+            "medicine",
+            "outcomes",
+            "contact",
+        )
+    ):
+        definition_score -= 0.6
+
+    return definition_score
+
+
 def rerank_results(question: str, results, number_of_results: int):
     """
     Sort search results again after Chroma returns them.
-    This helps definition questions prefer overview chunks.
+    This combines semantic search rank with simple word matching.
     """
 
     documents = results["documents"][0]
@@ -85,13 +251,17 @@ def rerank_results(question: str, results, number_of_results: int):
     distances = results["distances"][0]
     ids = results["ids"][0]
 
-    query_terms = tokenize(question)
-    wants_definition = is_definition_question(question)
+    normalized_question = normalize_question_text(question)
+    query_terms = tokenize(normalized_question)
+    wants_definition = is_definition_question(normalized_question)
+    definition_target = (
+        get_definition_target(normalized_question) if wants_definition else None
+    )
 
     ranked_results = []
 
     for index, document in enumerate(documents):
-        document_lower = document.lower()
+        document_lower = normalize_question_text(document)
         document_terms = tokenize(document)
         matching_terms = query_terms.intersection(document_terms)
 
@@ -100,30 +270,12 @@ def rerank_results(question: str, results, number_of_results: int):
         intent_score = 0
 
         if wants_definition:
-            source_file = metadatas[index].get("source_file", "").lower()
-            first_line = document_lower.splitlines()[0]
+            intent_score += calculate_definition_score(document, definition_target)
 
-            if "diabetes is a condition" in document_lower:
-                intent_score += 2.5
-            elif "diabetes is" in document_lower:
-                intent_score += 1.5
-
-            if source_file == "nhs_diabetes_overview.txt":
-                intent_score += 0.8
-
-            if "causes of diabetes" in document_lower:
-                intent_score += 0.5
-
-            if first_line.startswith(("complications", "treatment", "medicine")):
-                intent_score -= 1.0
-            if any(topic in source_file for topic in ("complications", "treatment")):
-                intent_score -= 0.8
-            if "path to remission programme" in first_line:
-                intent_score -= 1.0
-            if "path_to_remission" in source_file:
-                intent_score -= 0.8
-            if "call 999" in document_lower or "a&e" in document_lower:
-                intent_score -= 1.0
+        # Emergency chunks can be relevant for urgent questions, but they should
+        # not dominate ordinary educational questions.
+        if "call 999" in document_lower or "a&e" in document_lower:
+            intent_score -= 0.3
 
         relevance_score = semantic_score + lexical_score + intent_score
 
@@ -141,27 +293,32 @@ def rerank_results(question: str, results, number_of_results: int):
     return ranked_results[:number_of_results]
 
 
-def search_documents(question: str, number_of_results: int = 5):
+def search_documents(question: str, number_of_results: int = 5, verbose: bool = True):
     """
     1. Turn the user's question into an embedding.
     2. Search ChromaDB for similar chunks.
     3. Rerank the results.
     """
 
-    print("Loading embedding model...")
+    if verbose:
+        print("Loading embedding model...")
 
     # Use the same model that built the index.
-    model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    model = get_embedding_model()
 
-    print("Loading ChromaDB collection...")
+    if verbose:
+        print("Loading ChromaDB collection...")
     collection = load_collection()
 
-    print("Turning question into an embedding...")
+    if verbose:
+        print("Turning question into an embedding...")
 
     # Turn the question into searchable numbers.
-    question_embedding = model.encode([question]).tolist()
+    normalized_question = normalize_question_text(question)
+    question_embedding = model.encode([normalized_question]).tolist()
 
-    print("Searching for relevant chunks...\n")
+    if verbose:
+        print("Searching for relevant chunks...\n")
 
     candidate_count = min(max(number_of_results * 3, 10), collection.count())
 

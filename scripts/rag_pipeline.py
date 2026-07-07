@@ -7,6 +7,7 @@ from evidence_label import NO_CLEAR_EVIDENCE, label_evidence_strength
 from llm_providers import DEFAULT_PROVIDER, call_llm, get_default_model
 from prompts import build_system_prompt, build_user_prompt, get_chunk_source, get_chunk_text
 from safety_filter import is_unsafe_medical_question
+from scope_filter import SCOPE_REFUSAL, check_question_scope
 from search_test import search_documents
 
 
@@ -115,6 +116,34 @@ def run_rag_pipeline(
     if model is None:
         model = get_default_model(provider)
 
+    early_scope_check = check_question_scope(
+        question=question,
+        retrieved_chunks=[],
+        evidence={"signals": {}},
+    )
+
+    # Obvious non-medical topics should be treated as scope issues, not safety
+    # issues, even if the wording includes "my".
+    if early_scope_check["matched_out_of_scope_terms"]:
+        return {
+            "question": question,
+            "answer": SCOPE_REFUSAL,
+            "evidence_label": NO_CLEAR_EVIDENCE,
+            "evidence_reason": early_scope_check["reason"],
+            "unsafe_question": False,
+            "scope_check": early_scope_check,
+            "citations": [],
+            "retrieved_sources": [],
+            "retrieved_chunks": [],
+            "provider": provider,
+            "model": model,
+            "api_called": False,
+            "usage_estimate": {
+                "input_tokens": 0,
+                "max_output_tokens": 0,
+            },
+        }
+
     unsafe_question = is_unsafe_medical_question(question)
 
     # Unsafe questions do not need retrieval or an LLM call.
@@ -128,6 +157,12 @@ def run_rag_pipeline(
             "evidence_label": evidence_label,
             "evidence_reason": "The question appears to ask for personal medical advice, diagnosis, urgent care, or medication changes.",
             "unsafe_question": True,
+            "scope_check": {
+                "in_scope": False,
+                "reason": "Unsafe personal medical question.",
+                "matched_scope_terms": [],
+                "matched_out_of_scope_terms": [],
+            },
             "citations": [],
             "retrieved_sources": [],
             "retrieved_chunks": [],
@@ -140,11 +175,32 @@ def run_rag_pipeline(
             },
         }
 
-    results = search_documents(question)
+    results = search_documents(question, verbose=False)
     evidence = label_evidence_strength(question, results)
     evidence_label = evidence["label"]
     retrieved_chunks = format_retrieved_chunks(results)
     retrieved_sources = get_unique_sources(retrieved_chunks)
+    scope_check = check_question_scope(question, retrieved_chunks, evidence)
+
+    if not scope_check["in_scope"]:
+        return {
+            "question": question,
+            "answer": SCOPE_REFUSAL,
+            "evidence_label": NO_CLEAR_EVIDENCE,
+            "evidence_reason": scope_check["reason"],
+            "unsafe_question": False,
+            "scope_check": scope_check,
+            "citations": [],
+            "retrieved_sources": [],
+            "retrieved_chunks": [],
+            "provider": provider,
+            "model": model,
+            "api_called": False,
+            "usage_estimate": {
+                "input_tokens": 0,
+                "max_output_tokens": 0,
+            },
+        }
 
     system_prompt = build_system_prompt()
     user_prompt = build_user_prompt(
@@ -164,6 +220,7 @@ def run_rag_pipeline(
             "evidence_label": evidence_label,
             "evidence_reason": evidence["reason"],
             "unsafe_question": False,
+            "scope_check": scope_check,
             "citations": [],
             "retrieved_sources": retrieved_sources,
             "retrieved_chunks": retrieved_chunks,
@@ -199,6 +256,7 @@ def run_rag_pipeline(
         "evidence_label": evidence_label,
         "evidence_reason": evidence["reason"],
         "unsafe_question": False,
+        "scope_check": scope_check,
         "citations": retrieved_sources,
         "retrieved_sources": retrieved_sources,
         "retrieved_chunks": retrieved_chunks,

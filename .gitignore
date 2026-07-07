@@ -6,3 +6,6 @@ data/processed/
 *.pyc
 .DS_Store
 whattoremember.txt
+frontend/dist/
+frontend/node_modules/
+backend/__pycache__/
