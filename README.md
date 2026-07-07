@@ -65,18 +65,107 @@ Make sure you are inside the project folder:
 
 ```bash
 cd diasift
+```
 
 Run the document ingestion script:
 
+```bash
 python3 scripts/ingest_documents.py
+```
 
 This reads .txt files from:
 
+```text
 data/raw/
+```
 
 and creates:
 
+```text
 data/processed/chunks.json
+```
+
+Build the vector index:
+
+```bash
+python3 scripts/build_index.py
+```
+
+Test the RAG pipeline without calling an LLM:
+
+```bash
+python3 scripts/rag_pipeline.py "What is type 2 diabetes?"
+```
+
+## FastAPI Backend
+
+Install the Python dependencies:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Start the backend:
+
+```bash
+python -m uvicorn backend.main:app --reload
+```
+
+Open the API docs at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Useful endpoints:
+
+- `GET /health` checks whether the vector index is available.
+- `POST /answer` runs the RAG pipeline.
+
+Example request:
+
+```bash
+curl -X POST http://127.0.0.1:8000/answer \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What is type 2 diabetes?","call_api":false}'
+```
+
+Set `call_api` to `true` when you want the backend to call the configured LLM provider. For Gemini, add `GEMINI_API_KEY` to your environment or a local `.env` file.
+
+## Next.js Frontend
+
+Install the frontend dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+Start the FastAPI backend from the project root:
+
+```bash
+.venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+
+Start the frontend:
+
+```bash
+npm run dev -- --hostname 127.0.0.1 --port 3000
+```
+
+Open the chat page at:
+
+```text
+http://127.0.0.1:3000
+```
+
+The frontend proxies requests to the backend with:
+
+- `GET /api/health`
+- `POST /api/answer`
+
+By default, the proxy expects the backend at `http://127.0.0.1:8000`. Set `DIASIFT_API_URL` before starting Next.js if the backend runs somewhere else.
+
 Data Sources
 
 The project will use trusted public Type 2 Diabetes guidance sources such as:

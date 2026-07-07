@@ -43,9 +43,21 @@ QUESTION_STOPWORDS = {
 }
 
 
+def normalize_question_text(text: str) -> str:
+    """Normalize common diabetes shorthand before evidence checks."""
+    normalized = text.lower()
+    normalized = re.sub(r"\btype\s*-?\s*1\b", "type 1", normalized)
+    normalized = re.sub(r"\btype\s*-?\s*2\b", "type 2", normalized)
+    normalized = re.sub(r"\btype1\b", "type 1", normalized)
+    normalized = re.sub(r"\btype2\b", "type 2", normalized)
+    normalized = re.sub(r"\bt1d\b", "type 1 diabetes", normalized)
+    normalized = re.sub(r"\bt2d\b", "type 2 diabetes", normalized)
+    return normalized
+
+
 def tokenize(text: str) -> set[str]:
     """Break text into useful words we can compare."""
-    words = get_words(text)
+    words = get_words(normalize_question_text(text))
     return {
         word
         for word in words
@@ -55,7 +67,7 @@ def tokenize(text: str) -> set[str]:
 
 def get_words(text: str) -> set[str]:
     """Break text into all simple lowercase words."""
-    return set(re.findall(r"[a-z0-9]+", text.lower()))
+    return set(re.findall(r"[a-z0-9]+", normalize_question_text(text)))
 
 
 def calculate_result_support(question: str, results: list[dict]) -> dict:
