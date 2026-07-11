@@ -1,8 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-
-type Provider = "gemini" | "openai";
+import type { FormEvent, ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type RetrievedChunk = {
   source: string;
@@ -61,30 +60,6 @@ type ChatMessage =
       content: string;
     };
 
-const fallbackSources: RetrievedChunk[] = [
-  {
-    source: "NHS",
-    source_file: "nhs_type2diabetes_path_to_remission.txt",
-    chunk_index: 1,
-    text: "The NHS Type 2 Diabetes Path to Remission Programme can involve total diet replacement followed by gradual food reintroduction.",
-    relevance_score: 2.8,
-  },
-  {
-    source: "NICE",
-    source_file: "nice_type2diabetes_overview.txt",
-    chunk_index: 2,
-    text: "Guidance may recommend referral to an intensive lifestyle-change programme for eligible adults with type 2 diabetes.",
-    relevance_score: 2.4,
-  },
-  {
-    source: "Diabetes UK",
-    source_file: "nhs_diabetes_overview.txt",
-    chunk_index: 3,
-    text: "Remission means blood glucose levels are below the diabetes range without needing glucose-lowering medication.",
-    relevance_score: 1.8,
-  },
-];
-
 function getErrorMessage(payload: unknown, fallback: string) {
   if (
     payload &&
@@ -98,107 +73,41 @@ function getErrorMessage(payload: unknown, fallback: string) {
   return fallback;
 }
 
-function getSourceLabel(chunk: RetrievedChunk) {
-  const source = chunk.source.toLowerCase();
-
-  if (source.includes("nice")) {
-    return "NICE";
+function getSourceTitle(chunk: RetrievedChunk) {
+  if (!chunk.source_file) {
+    return chunk.source;
   }
 
-  if (source.includes("diabetes uk")) {
-    return "Diabetes UK";
-  }
-
-  if (source.includes("nhs")) {
-    return "NHS";
-  }
-
-  return chunk.source;
+  return chunk.source_file
+    .replace(".txt", "")
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
-function getEvidenceTone(label: string) {
+function getEvidenceClass(label: string) {
   const normalizedLabel = label.toLowerCase();
 
   if (normalizedLabel.includes("strong")) {
     return "strong";
   }
 
-  if (normalizedLabel.includes("partial") || normalizedLabel.includes("moderate")) {
-    return "moderate";
+  if (normalizedLabel.includes("partial")) {
+    return "partial";
   }
 
   return "limited";
 }
 
-function formatEvidenceLabel(label: string) {
-  if (label.toLowerCase().includes("strong")) {
-    return "Strong";
-  }
-
-  if (label.toLowerCase().includes("partial")) {
-    return "Moderate";
-  }
-
-  return "Limited";
-}
-
-function getCardTitle(chunk: RetrievedChunk) {
-  if (chunk.source_file) {
-    return chunk.source_file
-      .replace(".txt", "")
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }
-
-  return chunk.source;
-}
-
 export default function Home() {
   const [question, setQuestion] = useState("");
-  const [provider, setProvider] = useState<Provider>("gemini");
-  const [callApi, setCallApi] = useState(false);
-  const [maxOutputTokens, setMaxOutputTokens] = useState(500);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
-  const contentEndRef = useRef<HTMLDivElement | null>(null);
-
-  const latestResult = useMemo(() => {
-    return [...messages]
-      .reverse()
-      .find((message): message is Extract<ChatMessage, { role: "assistant" }> => {
-        return message.role === "assistant";
-      })?.result;
-  }, [messages]);
-
-  const latestUserQuestion = useMemo(() => {
-    return [...messages]
-      .reverse()
-      .find((message): message is Extract<ChatMessage, { role: "user" }> => {
-        return message.role === "user";
-      })?.content;
-  }, [messages]);
-
-  const latestError = useMemo(() => {
-    return [...messages]
-      .reverse()
-      .find((message): message is Extract<ChatMessage, { role: "error" }> => {
-        return message.role === "error";
-      })?.content;
-  }, [messages]);
-
-  const displayedChunks = latestResult?.retrieved_chunks.length
-    ? latestResult.retrieved_chunks.slice(0, 5)
-    : fallbackSources;
-
-  const evidenceTone = getEvidenceTone(latestResult?.evidence_label ?? "Strong");
-  const healthStatus = healthError
-    ? "Knowledge base offline"
-    : health?.status === "ok"
-      ? "Knowledge base active"
-      : "Checking knowledge base";
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
+  const hasMessages = messages.length > 0;
 
   useEffect(() => {
     async function loadHealth() {
@@ -206,15 +115,10 @@ export default function Home() {
         const response = await fetch("/api/health");
         const data = (await response.json()) as HealthResponse;
 
-        if (!response.ok) {
-          setHealthError("Backend is offline.");
-        } else {
-          setHealthError(null);
-        }
-
         setHealth(data);
+        setHealthError(response.ok ? null : "Backend offline");
       } catch {
-        setHealthError("Backend is offline.");
+        setHealthError("Backend offline");
       }
     }
 
@@ -222,7 +126,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isLoading]);
 
   async function submitQuestion(event?: FormEvent<HTMLFormElement>) {
@@ -233,13 +137,14 @@ export default function Home() {
       return;
     }
 
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: trimmedQuestion,
-    };
-
-    setMessages((current) => [...current, userMessage]);
+    setMessages((current) => [
+      ...current,
+      {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: trimmedQuestion,
+      },
+    ]);
     setQuestion("");
     setIsLoading(true);
 
@@ -251,9 +156,9 @@ export default function Home() {
         },
         body: JSON.stringify({
           question: trimmedQuestion,
-          provider,
-          call_api: callApi,
-          max_output_tokens: maxOutputTokens,
+          provider: "gemini",
+          call_api: false,
+          max_output_tokens: 500,
         }),
       });
       const data = await response.json();
@@ -263,26 +168,30 @@ export default function Home() {
       }
 
       const result = data as AnswerResponse;
-      const assistantMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content:
-          result.answer ??
-          "Dry run complete. Diasift has retrieved the most relevant source passages for this question.",
-        result,
-      };
 
-      setMessages((current) => [...current, assistantMessage]);
+      setMessages((current) => [
+        ...current,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content:
+            result.answer ??
+            "I found relevant guidance passages for this question. Review the evidence cards below.",
+          result,
+        },
+      ]);
     } catch (error) {
-      const errorMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "error",
-        content:
-          error instanceof Error
-            ? error.message
-            : "Something went wrong while contacting Diasift.",
-      };
-      setMessages((current) => [...current, errorMessage]);
+      setMessages((current) => [
+        ...current,
+        {
+          id: crypto.randomUUID(),
+          role: "error",
+          content:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while contacting Diasift.",
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -295,193 +204,284 @@ export default function Home() {
 
   return (
     <main className="appShell">
-      <aside className="sidebar" aria-label="Diasift navigation">
-        <div className="brand">
-          <div className="brandMark">*</div>
-          <div>
-            <div className="brandName">DiaSift</div>
-            <div className="brandSub">T2D Assistant</div>
+      <aside
+        className={`sideRail ${isSidebarCollapsed ? "collapsed" : ""}`}
+        aria-label="Diasift navigation"
+      >
+        <div className="brandBlock">
+          <div className="logoMark">
+            <Icon name="spark" />
           </div>
+          <div className="brandText">
+            <span>DiaSift</span>
+            <small>Type 2 DiabetesAssistant</small>
+          </div>
+
+         
         </div>
 
         <button className="newChatButton" type="button" onClick={startNewChat}>
-          <span>+</span>
-          New Chat
+          <Icon name="plus" />
+          <span className="navLabel">New Chat</span>
         </button>
 
-        <nav className="navList" aria-label="Primary navigation">
-          <a className="navItem active" href="#chat">
-            <span>...</span>
-            Chat
-          </a>
-          <a className="navItem" href="#sources">
-            <span>[]</span>
-            Sources
-          </a>
-          <a className="navItem" href="#saved">
-            <span>[]</span>
-            Saved Answers
-          </a>
-          <a className="navItem" href="#about">
-            <span>i</span>
-            About
-          </a>
+        <nav className="sidebarNav" aria-label="Primary navigation">
+          <NavButton icon="chat" label="Chat" active />
+          <NavButton icon="book" label="Sources" />
+          <NavButton icon="bookmark" label="Saved Answers" />
+          <NavButton icon="info" label="About" />
         </nav>
-
-        <div className="safetyNote">
-          This tool provides general health information and does not replace advice
-          from a healthcare professional.
-        </div>
-
-        <div className="prototypeLabel">MSc Prototype - 2026</div>
+  <button
+            className="collapseButton"
+            type="button"
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={() => setIsSidebarCollapsed((current) => !current)}
+          >
+            <Icon name={isSidebarCollapsed ? "expand" : "collapse"} />
+          </button>
+        <div className="railSpacer" />
+       
+        {/* <div className="safetyNote">
+          <span className="navLabel">
+            General health information only. Always consult your GP or diabetes
+            care team.
+          </span>
+        </div> */}
       </aside>
 
-      <section className="workspace" id="chat" aria-label="Type 2 Diabetes chat">
-        <header className="topBar">
-          <div>
-            <h1>Type 2 Diabetes Chat</h1>
-            <p>RAG-powered - NICE, NHS, Diabetes UK</p>
-          </div>
-          <div className="headerActions">
-            <div className={`healthPill ${healthError ? "offline" : ""}`}>
-              <span />
-              {healthStatus}
-            </div>
-            <div className="devicePill">[] Mobile</div>
-          </div>
+      <section className={`chatCanvas ${hasMessages ? "hasMessages" : ""}`}>
+        <header className="topStatus">
+          {/* <span className={healthError ? "statusDot warning" : "statusDot"} /> */}
+          <span>{healthError ?? health?.status ?? "Checking knowledge base"}</span>
+          {health?.indexed_chunks ? <strong>{health.indexed_chunks} chunks</strong> : null}
         </header>
 
-        <div className="contentArea">
-          <div className="conversationStrip">
-            {latestUserQuestion ? (
-              <article className="questionPanel">
-                <span>Your question</span>
-                <p>{latestUserQuestion}</p>
-              </article>
-            ) : null}
-
-            {latestResult?.answer ? (
-              <article className="answerPanel">
-                <span>Diasift answer</span>
-                <p>{latestResult.answer}</p>
-              </article>
-            ) : null}
-
-            {latestError ? (
-              <article className="errorPanel">
-                <span>Connection issue</span>
-                <p>{latestError}</p>
-              </article>
-            ) : null}
-          </div>
-
-          <div className="sourceList" id="sources">
-            {displayedChunks.map((chunk, index) => {
-              const cardTone =
-                index === 0 ? evidenceTone : index === 1 ? "strong" : "moderate";
-
-              return (
-                <article
-                  className="sourceCard"
-                  key={`${chunk.source_file}-${chunk.chunk_index}-${index}`}
-                >
-                  <div className="sourceCardHeader">
-                    <span className="sourceBadge">{getSourceLabel(chunk)}</span>
-                    <span className={`strengthBadge ${cardTone}`}>
-                      ...{" "}
-                      {latestResult
-                        ? formatEvidenceLabel(latestResult.evidence_label)
-                        : index < 2
-                          ? "Strong"
-                          : "Moderate"}
-                    </span>
-                  </div>
-
-                  <h2>{getCardTitle(chunk)}</h2>
-                  <blockquote>{chunk.text}</blockquote>
-
-                  <div className="cardLinks">
-                    <button type="button" title={latestResult?.evidence_reason}>
-                      Why this answer?
-                    </button>
-                    <button type="button">
-                      View full source -&gt;
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-
-            {isLoading ? (
-              <article className="sourceCard loadingCard">
-                <div className="sourceCardHeader">
-                  <span className="sourceBadge">Diasift</span>
-                  <span className="strengthBadge moderate">... Searching</span>
-                </div>
-                <h2>Searching trusted guidance</h2>
-                <blockquote>
-                  Diasift is retrieving relevant passages and checking evidence strength.
-                </blockquote>
-              </article>
-            ) : null}
-            <div ref={contentEndRef} />
-          </div>
-        </div>
-
-        <form className="composer" onSubmit={submitQuestion}>
-          <div className="inputRow">
-            <input
-              value={question}
-              onChange={(event) => setQuestion(event.target.value)}
-              placeholder="Ask about Type 2 Diabetes guidance..."
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  submitQuestion();
-                }
-              }}
+        {!hasMessages ? (
+          <section className="homeStage" aria-label="Start chat">
+            <div className="orb" />
+            <h1>Good day, Oreoluwa</h1>
+            <p>Ask a Type 2 Diabetes guidance question.</p>
+            <PromptBox
+              question={question}
+              isLoading={isLoading}
+              onQuestionChange={setQuestion}
+              onSubmit={submitQuestion}
             />
-            <button type="submit" disabled={isLoading || !question.trim()} aria-label="Send">
-              &gt;
-            </button>
-          </div>
+          </section>
+        ) : (
+          <>
+            <section className="transcript" aria-live="polite">
+              {messages.map((message) => (
+                <article key={message.id} className={`chatMessage ${message.role}`}>
+                  <span>{message.role === "user" ? "You" : "Diasift"}</span>
+                  <p>{message.content}</p>
 
-          <div className="composerMeta">
-            <label>
-              Provider
-              <select
-                value={provider}
-                onChange={(event) => setProvider(event.target.value as Provider)}
-              >
-                <option value="gemini">Gemini</option>
-                <option value="openai">OpenAI</option>
-              </select>
-            </label>
-            <label>
-              Max tokens
-              <input
-                type="number"
-                min={100}
-                max={2000}
-                step={100}
-                value={maxOutputTokens}
-                onChange={(event) => setMaxOutputTokens(Number(event.target.value))}
+                  {message.role === "assistant" ? (
+                    <>
+                      <div className="answerMeta">
+                        <span className={getEvidenceClass(message.result.evidence_label)}>
+                          {message.result.evidence_label}
+                        </span>
+                        <span>{message.result.api_called ? "LLM answer" : "Retrieved evidence"}</span>
+                        <span>{message.result.model}</span>
+                      </div>
+
+                      {message.result.retrieved_chunks.length ? (
+                        <section className="evidenceGrid" aria-label="Retrieved evidence">
+                          {message.result.retrieved_chunks.slice(0, 4).map((chunk, index) => (
+                            <article
+                              className="evidenceCard"
+                              key={`${chunk.source_file}-${chunk.chunk_index}-${index}`}
+                            >
+                              <div className="evidenceTopline">
+                                <span>{chunk.source}</span>
+                                <strong>{message.result.evidence_label}</strong>
+                              </div>
+                              <h2>{getSourceTitle(chunk)}</h2>
+                              <p>{chunk.text}</p>
+                            </article>
+                          ))}
+                        </section>
+                      ) : null}
+                    </>
+                  ) : null}
+                </article>
+              ))}
+
+              {isLoading ? (
+                <article className="chatMessage assistant">
+                  <span>Diasift</span>
+                  <p>Searching trusted guidance...</p>
+                </article>
+              ) : null}
+
+              <div ref={transcriptEndRef} />
+            </section>
+
+            <div className="floatingPrompt">
+              <PromptBox
+                question={question}
+                isLoading={isLoading}
+                onQuestionChange={setQuestion}
+                onSubmit={submitQuestion}
+                compact
               />
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={callApi}
-                onChange={(event) => setCallApi(event.target.checked)}
-              />
-              Call LLM
-            </label>
-            <span>
-              General health information only - Always consult your GP or diabetes
-              care team
-            </span>
-          </div>
-        </form>
+            </div>
+          </>
+        )}
       </section>
     </main>
+  );
+}
+
+function NavButton({
+  icon,
+  label,
+  active = false,
+}: {
+  icon: IconName;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <button
+      className={`navButton ${active ? "active" : ""}`}
+      type="button"
+      aria-current={active ? "page" : undefined}
+      title={label}
+    >
+      <Icon name={icon} />
+      <span className="navLabel">{label}</span>
+    </button>
+  );
+}
+
+function PromptBox({
+  question,
+  isLoading,
+  compact = false,
+  onQuestionChange,
+  onSubmit,
+}: {
+  question: string;
+  isLoading: boolean;
+  compact?: boolean;
+  onQuestionChange: (question: string) => void;
+  onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <form className={`promptBox ${compact ? "compact" : ""}`} onSubmit={onSubmit}>
+      {/* <button className="promptAction" type="button" aria-label="Add context">
+        <Icon name="plus" />
+      </button> */}
+      <input
+        value={question}
+        onChange={(event) => onQuestionChange(event.target.value)}
+        placeholder="Ask anything"
+        maxLength={1000}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            onSubmit();
+          }
+        }}
+      />
+
+      <div className="promptFooter">
+        {/* <span className="qualityDot" />
+        <span className="promptMode">Guidance</span> */}
+        <span className="promptCount">{question.length}/1000</span>
+        <button className="sendButton" type="submit" disabled={isLoading || !question.trim()} aria-label="Send">
+          {isLoading ? "..." : <Icon name="send" />}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+type IconName =
+  | "spark"
+  | "plus"
+  | "chat"
+  | "book"
+  | "bookmark"
+  | "info"
+  | "collapse"
+  | "expand"
+  | "send";
+
+function Icon({ name }: { name: IconName }) {
+  const paths: Record<IconName, ReactNode> = {
+    spark: (
+      <>
+        <path d="M12 3v3" />
+        <path d="M12 18v3" />
+        <path d="M3 12h3" />
+        <path d="M18 12h3" />
+        <path d="m5.6 5.6 2.1 2.1" />
+        <path d="m16.3 16.3 2.1 2.1" />
+        <path d="m18.4 5.6-2.1 2.1" />
+        <path d="m7.7 16.3-2.1 2.1" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    ),
+    plus: (
+      <>
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+      </>
+    ),
+    chat: (
+      <>
+        <path d="M5 6.5h14v9H9l-4 3v-12Z" />
+        <path d="M9 11h.1" />
+        <path d="M12 11h.1" />
+        <path d="M15 11h.1" />
+      </>
+    ),
+    book: (
+      <>
+        <path d="M4 5.5c2.8-1.1 5.3-.8 8 1v13c-2.7-1.8-5.2-2.1-8-1v-13Z" />
+        <path d="M20 5.5c-2.8-1.1-5.3-.8-8 1v13c2.7-1.8 5.2-2.1 8-1v-13Z" />
+      </>
+    ),
+    bookmark: <path d="M7 4.5h10v15l-5-3-5 3v-15Z" />,
+    info: (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 11v5" />
+        <path d="M12 8h.1" />
+      </>
+    ),
+    collapse: (
+      <>
+        <path d="M15 6 9 12l6 6" />
+        <path d="M20 6v12" />
+      </>
+    ),
+    expand: (
+      <>
+        <path d="m9 6 6 6-6 6" />
+        <path d="M4 6v12" />
+      </>
+    ),
+    send: (
+      <>
+        <path d="M5 12h12" />
+        <path d="m13 6 6 6-6 6" />
+      </>
+    ),
+  };
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="icon"
+      fill="none"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {paths[name]}
+    </svg>
   );
 }
