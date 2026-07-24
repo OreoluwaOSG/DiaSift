@@ -240,6 +240,45 @@ def calculate_definition_score(document: str, definition_target: dict) -> float:
     return definition_score
 
 
+MAX_CHUNKS_PER_SOURCE = 2
+
+
+def apply_diversity_cap(
+    ranked_results: list[dict],
+    number_of_results: int,
+    max_per_source: int = MAX_CHUNKS_PER_SOURCE,
+) -> list[dict]:
+    """
+    Limit how many chunks from the same source can fill the top results.
+
+    Without this, one large document can fill every slot and push out a
+    correct-but-thin source entirely. Results over the per-source cap are
+    kept as overflow and only used to fill remaining slots if there are not
+    enough diverse candidates.
+    """
+    selected = []
+    overflow = []
+    source_counts: dict[str, int] = {}
+
+    for result in ranked_results:
+        source = result["metadata"].get("source")
+        count = source_counts.get(source, 0)
+
+        if count < max_per_source:
+            selected.append(result)
+            source_counts[source] = count + 1
+        else:
+            overflow.append(result)
+
+        if len(selected) >= number_of_results:
+            break
+
+    if len(selected) < number_of_results:
+        selected.extend(overflow[: number_of_results - len(selected)])
+
+    return selected[:number_of_results]
+
+
 def rerank_results(question: str, results, number_of_results: int):
     """
     Sort search results again after Chroma returns them.
@@ -286,11 +325,16 @@ def rerank_results(question: str, results, number_of_results: int):
                 "metadata": metadatas[index],
                 "distance": distances[index],
                 "relevance_score": relevance_score,
+                "score_breakdown": {
+                    "semantic_score": semantic_score,
+                    "lexical_score": lexical_score,
+                    "intent_score": intent_score,
+                },
             }
         )
 
     ranked_results.sort(key=lambda item: item["relevance_score"], reverse=True)
-    return ranked_results[:number_of_results]
+    return apply_diversity_cap(ranked_results, number_of_results)
 
 
 def search_documents(question: str, number_of_results: int = 5, verbose: bool = True):

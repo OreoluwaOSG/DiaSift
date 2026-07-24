@@ -1,487 +1,311 @@
-"use client";
+import Link from "next/link";
 
-import type { FormEvent, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
-
-type RetrievedChunk = {
-  source: string;
-  source_file: string | null;
-  chunk_index: number | null;
-  text: string;
-  relevance_score: number | null;
-};
-
-type AnswerResponse = {
-  question: string;
-  answer: string | null;
-  evidence_label: string;
-  evidence_reason: string;
-  unsafe_question: boolean;
-  scope_check: {
-    in_scope: boolean;
-    reason: string;
-    matched_scope_terms: string[];
-    matched_out_of_scope_terms: string[];
-  };
-  citations: string[];
-  retrieved_sources: string[];
-  retrieved_chunks: RetrievedChunk[];
-  provider: string;
-  model: string;
-  api_called: boolean;
-  usage_estimate: {
-    input_tokens: number;
-    max_output_tokens: number;
-  };
-};
-
-type HealthResponse = {
-  status: string;
-  collection_name: string;
-  vectorstore_path: string;
-  indexed_chunks: number | null;
-};
-
-type ChatMessage =
-  | {
-      id: string;
-      role: "user";
-      content: string;
-    }
-  | {
-      id: string;
-      role: "assistant";
-      content: string;
-      result: AnswerResponse;
-    }
-  | {
-      id: string;
-      role: "error";
-      content: string;
-    };
-
-function getErrorMessage(payload: unknown, fallback: string) {
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "detail" in payload &&
-    typeof payload.detail === "string"
-  ) {
-    return payload.detail;
-  }
-
-  return fallback;
-}
-
-function getSourceTitle(chunk: RetrievedChunk) {
-  if (!chunk.source_file) {
-    return chunk.source;
-  }
-
-  return chunk.source_file
-    .replace(".txt", "")
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function getEvidenceClass(label: string) {
-  const normalizedLabel = label.toLowerCase();
-
-  if (normalizedLabel.includes("strong")) {
-    return "strong";
-  }
-
-  if (normalizedLabel.includes("partial")) {
-    return "partial";
-  }
-
-  return "limited";
-}
-
-export default function Home() {
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [healthError, setHealthError] = useState<string | null>(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
-  const hasMessages = messages.length > 0;
-
-  useEffect(() => {
-    async function loadHealth() {
-      try {
-        const response = await fetch("/api/health");
-        const data = (await response.json()) as HealthResponse;
-
-        setHealth(data);
-        setHealthError(response.ok ? null : "Backend offline");
-      } catch {
-        setHealthError("Backend offline");
-      }
-    }
-
-    loadHealth();
-  }, []);
-
-  useEffect(() => {
-    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isLoading]);
-
-  async function submitQuestion(event?: FormEvent<HTMLFormElement>) {
-    event?.preventDefault();
-
-    const trimmedQuestion = question.trim();
-    if (!trimmedQuestion || isLoading) {
-      return;
-    }
-
-    setMessages((current) => [
-      ...current,
-      {
-        id: crypto.randomUUID(),
-        role: "user",
-        content: trimmedQuestion,
-      },
-    ]);
-    setQuestion("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/answer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: trimmedQuestion,
-          provider: "gemini",
-          call_api: false,
-          max_output_tokens: 500,
-        }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data, "Diasift could not answer that question."));
-      }
-
-      const result = data as AnswerResponse;
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content:
-            result.answer ??
-            "I found relevant guidance passages for this question. Review the evidence cards below.",
-          result,
-        },
-      ]);
-    } catch (error) {
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          role: "error",
-          content:
-            error instanceof Error
-              ? error.message
-              : "Something went wrong while contacting Diasift.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function startNewChat() {
-    setMessages([]);
-    setQuestion("");
-  }
-
+export default function LandingPage() {
   return (
-    <main className="appShell">
-      <aside
-        className={`sideRail ${isSidebarCollapsed ? "collapsed" : ""}`}
-        aria-label="Diasift navigation"
-      >
-        <div className="brandBlock">
-          <div className="logoMark">
-            <Icon name="spark" />
-          </div>
-          <div className="brandText">
-            <span>DiaSift</span>
-            <small>Type 2 DiabetesAssistant</small>
-          </div>
-
-         
-        </div>
-
-        <button className="newChatButton" type="button" onClick={startNewChat}>
-          <Icon name="plus" />
-          <span className="navLabel">New Chat</span>
-        </button>
-
-        <nav className="sidebarNav" aria-label="Primary navigation">
-          <NavButton icon="chat" label="Chat" active />
-          <NavButton icon="book" label="Sources" />
-          <NavButton icon="bookmark" label="Saved Answers" />
-          <NavButton icon="info" label="About" />
-        </nav>
-  <button
-            className="collapseButton"
-            type="button"
-            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={() => setIsSidebarCollapsed((current) => !current)}
-          >
-            <Icon name={isSidebarCollapsed ? "expand" : "collapse"} />
-          </button>
-        <div className="railSpacer" />
-       
-        {/* <div className="safetyNote">
-          <span className="navLabel">
-            General health information only. Always consult your GP or diabetes
-            care team.
-          </span>
-        </div> */}
-      </aside>
-
-      <section className={`chatCanvas ${hasMessages ? "hasMessages" : ""}`}>
-        <header className="topStatus">
-          {/* <span className={healthError ? "statusDot warning" : "statusDot"} /> */}
-          <span>{healthError ?? health?.status ?? "Checking knowledge base"}</span>
-          {health?.indexed_chunks ? <strong>{health.indexed_chunks} chunks</strong> : null}
-        </header>
-
-        {!hasMessages ? (
-          <section className="homeStage" aria-label="Start chat">
-            <div className="orb" />
-            <h1>Good day, Oreoluwa</h1>
-            <p>Ask a Type 2 Diabetes guidance question.</p>
-            <PromptBox
-              question={question}
-              isLoading={isLoading}
-              onQuestionChange={setQuestion}
-              onSubmit={submitQuestion}
-            />
-          </section>
-        ) : (
-          <>
-            <section className="transcript" aria-live="polite">
-              {messages.map((message) => (
-                <article key={message.id} className={`chatMessage ${message.role}`}>
-                  <span>{message.role === "user" ? "You" : "Diasift"}</span>
-                  <p>{message.content}</p>
-
-                  {message.role === "assistant" ? (
-                    <>
-                      <div className="answerMeta">
-                        <span className={getEvidenceClass(message.result.evidence_label)}>
-                          {message.result.evidence_label}
-                        </span>
-                        <span>{message.result.api_called ? "LLM answer" : "Retrieved evidence"}</span>
-                        <span>{message.result.model}</span>
-                      </div>
-
-                      {message.result.retrieved_chunks.length ? (
-                        <section className="evidenceGrid" aria-label="Retrieved evidence">
-                          {message.result.retrieved_chunks.slice(0, 4).map((chunk, index) => (
-                            <article
-                              className="evidenceCard"
-                              key={`${chunk.source_file}-${chunk.chunk_index}-${index}`}
-                            >
-                              <div className="evidenceTopline">
-                                <span>{chunk.source}</span>
-                                <strong>{message.result.evidence_label}</strong>
-                              </div>
-                              <h2>{getSourceTitle(chunk)}</h2>
-                              <p>{chunk.text}</p>
-                            </article>
-                          ))}
-                        </section>
-                      ) : null}
-                    </>
-                  ) : null}
-                </article>
-              ))}
-
-              {isLoading ? (
-                <article className="chatMessage assistant">
-                  <span>Diasift</span>
-                  <p>Searching trusted guidance...</p>
-                </article>
-              ) : null}
-
-              <div ref={transcriptEndRef} />
-            </section>
-
-            <div className="floatingPrompt">
-              <PromptBox
-                question={question}
-                isLoading={isLoading}
-                onQuestionChange={setQuestion}
-                onSubmit={submitQuestion}
-                compact
-              />
-            </div>
-          </>
-        )}
-      </section>
+    <main className="site">
+      <SiteHeader />
+      <Hero />
+      <HowItWorks />
+      <EvidenceLabels />
+      <KnowledgeBase />
+      <Guardrails />
+      <FinalCta />
+      <SiteFooter />
     </main>
   );
 }
 
-function NavButton({
-  icon,
-  label,
-  active = false,
-}: {
-  icon: IconName;
-  label: string;
-  active?: boolean;
-}) {
+function SiteHeader() {
   return (
-    <button
-      className={`navButton ${active ? "active" : ""}`}
-      type="button"
-      aria-current={active ? "page" : undefined}
-      title={label}
-    >
-      <Icon name={icon} />
-      <span className="navLabel">{label}</span>
-    </button>
-  );
-}
+    <header className="siteHeader">
+      <div className="siteHeaderInner">
+        <span className="siteLogo">DiaSift</span>
 
-function PromptBox({
-  question,
-  isLoading,
-  compact = false,
-  onQuestionChange,
-  onSubmit,
-}: {
-  question: string;
-  isLoading: boolean;
-  compact?: boolean;
-  onQuestionChange: (question: string) => void;
-  onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
-}) {
-  return (
-    <form className={`promptBox ${compact ? "compact" : ""}`} onSubmit={onSubmit}>
-      {/* <button className="promptAction" type="button" aria-label="Add context">
-        <Icon name="plus" />
-      </button> */}
-      <input
-        value={question}
-        onChange={(event) => onQuestionChange(event.target.value)}
-        placeholder="Ask anything"
-        maxLength={1000}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            onSubmit();
-          }
-        }}
-      />
+        <nav className="siteNav" aria-label="Primary">
+          <a href="#how-it-works">How it works</a>
+          <a href="#sources">Sources</a>
+          <a href="#safety">Safety</a>
+        </nav>
 
-      <div className="promptFooter">
-        {/* <span className="qualityDot" />
-        <span className="promptMode">Guidance</span> */}
-        <span className="promptCount">{question.length}/1000</span>
-        <button className="sendButton" type="submit" disabled={isLoading || !question.trim()} aria-label="Send">
-          {isLoading ? "..." : <Icon name="send" />}
-        </button>
+        <Link href="/ask" className="btn btnPrimary btnSmall">
+          Ask DiaSift
+        </Link>
       </div>
-    </form>
+    </header>
   );
 }
 
-type IconName =
-  | "spark"
-  | "plus"
-  | "chat"
-  | "book"
-  | "bookmark"
-  | "info"
-  | "collapse"
-  | "expand"
-  | "send";
+function Hero() {
+  return (
+    <section className="hero">
+      <div className="heroCopy">
+        <span className="overline">Required first use &middot; Educational information only</span>
 
-function Icon({ name }: { name: IconName }) {
-  const paths: Record<IconName, ReactNode> = {
-    spark: (
-      <>
-        <path d="M12 3v3" />
-        <path d="M12 18v3" />
-        <path d="M3 12h3" />
-        <path d="M18 12h3" />
-        <path d="m5.6 5.6 2.1 2.1" />
-        <path d="m16.3 16.3 2.1 2.1" />
-        <path d="m18.4 5.6-2.1 2.1" />
-        <path d="m7.7 16.3-2.1 2.1" />
-        <circle cx="12" cy="12" r="3" />
-      </>
-    ),
-    plus: (
-      <>
-        <path d="M12 5v14" />
-        <path d="M5 12h14" />
-      </>
-    ),
-    chat: (
-      <>
-        <path d="M5 6.5h14v9H9l-4 3v-12Z" />
-        <path d="M9 11h.1" />
-        <path d="M12 11h.1" />
-        <path d="M15 11h.1" />
-      </>
-    ),
-    book: (
-      <>
-        <path d="M4 5.5c2.8-1.1 5.3-.8 8 1v13c-2.7-1.8-5.2-2.1-8-1v-13Z" />
-        <path d="M20 5.5c-2.8-1.1-5.3-.8-8 1v13c2.7-1.8 5.2-2.1 8-1v-13Z" />
-      </>
-    ),
-    bookmark: <path d="M7 4.5h10v15l-5-3-5 3v-15Z" />,
-    info: (
-      <>
-        <circle cx="12" cy="12" r="8" />
-        <path d="M12 11v5" />
-        <path d="M12 8h.1" />
-      </>
-    ),
-    collapse: (
-      <>
-        <path d="M15 6 9 12l6 6" />
-        <path d="M20 6v12" />
-      </>
-    ),
-    expand: (
-      <>
-        <path d="m9 6 6 6-6 6" />
-        <path d="M4 6v12" />
-      </>
-    ),
-    send: (
-      <>
-        <path d="M5 12h12" />
-        <path d="m13 6 6 6-6 6" />
-      </>
-    ),
-  };
+        <h1>
+          Type 2 diabetes, explained.{" "}
+          <span className="accentText">Every answer traced to its source.</span>
+        </h1>
+
+        <p>
+          Search results mix clinical guidance with blogs, forums and ads. DiaSift
+          answers your questions using only trusted guidance from the NHS, NICE
+          and WHO &mdash; and shows the evidence behind every answer.
+        </p>
+
+        <div className="heroActions">
+          <Link href="/ask" className="btn btnPrimary">
+            Ask DiaSift
+          </Link>
+          <a href="#how-it-works" className="btn btnGhost">
+            See how it works
+          </a>
+        </div>
+      </div>
+
+      <div className="heroDemo">
+        <div className="demoCard">
+          <div className="demoQuestion">
+            <span className="demoQuestionMark">?</span>
+            <p>What does HbA1c actually measure?</p>
+          </div>
+
+          <div className="demoEvidence">
+            <span className="evidenceDot strong" />
+            <span>Strong evidence</span>
+          </div>
+
+          <p className="demoAnswer">
+            HbA1c reflects your average blood glucose over the past two to three
+            months. It&apos;s measured because day-to-day readings move around,
+            while HbA1c reveals the longer pattern &mdash; so clinicians can see
+            how well your diabetes is being managed over time.
+          </p>
+
+          <div className="demoSources">
+            <span>NHS &middot; Type 2 diabetes</span>
+            <span>NICE &middot; NG28</span>
+          </div>
+        </div>
+
+        <span className="demoCaption">A real DiaSift answer, with its evidence</span>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    {
+      number: "01",
+      title: "Ask",
+      description: "Put your question in plain words — the way you'd ask a nurse, not a search engine.",
+    },
+    {
+      number: "02",
+      title: "Sift",
+      description:
+        "DiaSift searches a curated base of NHS, NICE and WHO guidance and keeps only the passages that genuinely answer you.",
+    },
+    {
+      number: "03",
+      title: "Answer",
+      description: "You get a clear answer written from those passages, with named sources and an evidence label attached.",
+    },
+  ];
 
   return (
-    <svg
-      aria-hidden="true"
-      className="icon"
-      fill="none"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {paths[name]}
-    </svg>
+    <section className="section" id="how-it-works">
+      <div className="sectionIntro">
+        <span className="overline">How it works</span>
+        <h2>Three points on a line.</h2>
+        <p>
+          DiaSift doesn&apos;t answer from an AI model&apos;s memory. It retrieves
+          trusted guidance first, then writes the answer from what it found.
+        </p>
+      </div>
+
+      <ol className="timeline">
+        {steps.map((step) => (
+          <li key={step.number} className="timelineStep">
+            <span className="timelineDot" />
+            <span className="timelineNumber">{step.number}</span>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function EvidenceLabels() {
+  const labels = [
+    {
+      tone: "strong",
+      label: "Strong evidence",
+      description:
+        "Multiple trusted passages directly support the answer. DiaSift responds confidently and cites each source.",
+    },
+    {
+      tone: "partial",
+      label: "Partial evidence",
+      description:
+        "Related guidance was found, but it doesn't fully cover the question. DiaSift answers cautiously and tells you what's missing.",
+    },
+    {
+      tone: "limited",
+      label: "No clear evidence",
+      description: (
+        <>
+          The sources don&apos;t support an answer &mdash; so DiaSift{" "}
+          <strong>says so, instead of guessing.</strong>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <section className="section sectionAlt">
+      <div className="sectionIntro">
+        <span className="overline">Evidence labels</span>
+        <h2>Every answer wears its confidence.</h2>
+        <p>
+          Before DiaSift answers, it weighs how well the retrieved guidance
+          supports a response &mdash; and says so, plainly.
+        </p>
+      </div>
+
+      <div className="evidenceLabelList">
+        {labels.map((item) => (
+          <div className="evidenceLabelRow" key={item.label}>
+            <span className={`evidenceDot ${item.tone}`} />
+            <span className="evidenceLabelName">{item.label}</span>
+            <p>{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function KnowledgeBase() {
+  const sources = [
+    {
+      name: "NHS",
+      description: "Overview, treatment, complications and the Path to Remission Programme.",
+    },
+    {
+      name: "NICE",
+      description: "NG28 — the clinical guideline for type 2 diabetes in adults.",
+    },
+    {
+      name: "WHO",
+      description: "Global fact sheet on diabetes and its prevention.",
+    },
+    {
+      name: "nidirect",
+      description: "Northern Ireland's official health guidance on type 2 diabetes.",
+    },
+  ];
+
+  return (
+    <section className="section" id="sources">
+      <div className="sectionIntro">
+        <span className="overline">The knowledge base</span>
+        <h2>Built on guidance, not the open web.</h2>
+        <p>DiaSift only reads from a curated collection of recognised type 2 diabetes guidance.</p>
+      </div>
+
+      <div className="sourceGrid">
+        {sources.map((source) => (
+          <div className="sourceCard" key={source.name}>
+            <h3>{source.name}</h3>
+            <p>{source.description}</p>
+          </div>
+        ))}
+      </div>
+
+      <p className="sectionNote">
+        When guidance changes, the collection is updated &mdash; no retraining,
+        no stale answers baked into a model. Every stored passage keeps a record
+        of where it came from.
+      </p>
+    </section>
+  );
+}
+
+function Guardrails() {
+  const rules = [
+    {
+      title: "No diagnosis",
+      description:
+        "DiaSift won't tell you whether you have diabetes, or interpret your symptoms. Those questions are redirected to your GP or nurse.",
+    },
+    {
+      title: "No medication decisions",
+      description:
+        "It explains what treatments are and how they're generally used — never whether you should start, stop or change a dose.",
+    },
+    {
+      title: "No personal data kept",
+      description:
+        "DiaSift asks for no personal details and stores nothing identifiable. Your questions are for answering, not collecting.",
+    },
+  ];
+
+  return (
+    <section className="section sectionAlt" id="safety">
+      <div className="sectionIntro">
+        <span className="overline">Guardrails, by design</span>
+        <h2>What DiaSift won&apos;t do.</h2>
+        <p>Refusing the wrong questions isn&apos;t a limitation of the system. It&apos;s the point.</p>
+      </div>
+
+      <div className="guardrailGrid">
+        {rules.map((rule) => (
+          <div className="guardrailCard" key={rule.title}>
+            <span className="guardrailRule" />
+            <h3>{rule.title}</h3>
+            <p>{rule.description}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FinalCta() {
+  return (
+    <section className="finalCta">
+      <h2>Ask the internet less. Ask the guidance directly.</h2>
+      <p>Free to use. No account, no personal details.</p>
+      <Link href="/ask" className="btn btnPrimary">
+        Ask DiaSift
+      </Link>
+    </section>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer className="siteFooter">
+      <p className="disclaimer">
+        DiaSift is an AI research prototype for educational use. It does not
+        give medical diagnosis, treatment or personalised health advice, and it
+        is not a substitute for your GP or pharmacist. If you&apos;re ever
+        worried about your symptoms, contact your GP or NHS 111; in an
+        emergency, call 999.
+      </p>
+
+      <div className="footerRow">
+        <span className="footerBrand">DiaSift</span>
+        <span className="footerLinks">
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>About the research</span>
+        </span>
+        <span>&copy; 2026</span>
+      </div>
+    </footer>
   );
 }

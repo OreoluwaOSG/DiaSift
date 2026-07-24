@@ -58,16 +58,29 @@ def build_local_answer(question: str, evidence_label: str, unsafe_question: bool
     return None
 
 
+MIN_DISPLAY_RELEVANCE_SCORE = 1.0
+
+
 def format_retrieved_chunks(results: list[dict]) -> list[dict]:
     """
     Return retrieved chunks in a clean backend-friendly shape.
 
     The search script uses document/metadata. The backend can use this simpler
     source/text shape later.
+
+    Chunks below MIN_DISPLAY_RELEVANCE_SCORE are dropped here, not earlier.
+    Evidence-strength labeling still looks at every retrieved chunk (it needs
+    the full picture to judge support), but showing every chunk to the user
+    regardless of quality padded the evidence cards with weak filler. This
+    keeps citations and the LLM's context limited to chunks that clearly
+    earned their place.
     """
     formatted_chunks = []
 
     for result in results:
+        if result.get("relevance_score", 0) < MIN_DISPLAY_RELEVANCE_SCORE:
+            continue
+
         metadata = result.get("metadata", {})
 
         formatted_chunks.append(
@@ -77,6 +90,7 @@ def format_retrieved_chunks(results: list[dict]) -> list[dict]:
                 "chunk_index": metadata.get("chunk_index"),
                 "text": get_chunk_text(result),
                 "relevance_score": result.get("relevance_score"),
+                "score_breakdown": result.get("score_breakdown"),
             }
         )
 

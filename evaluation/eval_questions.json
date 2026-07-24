@@ -1,0 +1,146 @@
+[
+  {
+    "question": "What is type 2 diabetes?",
+    "expected_sources": ["Nhs Type2 Diabetes Overview", "Nhs Diabetes Overview", "Nice Type2 Diabetes Overview", "Nidirect Type2 Diabetes Overview"]
+  },
+  {
+    "question": "What are the symptoms of type 2 diabetes?",
+    "expected_sources": ["Nhs Type2 Diabetes Symptoms", "Nidirect Type2 Diabetes Overview"]
+  },
+  {
+    "question": "How is type 2 diabetes treated?",
+    "expected_sources": ["Nhs Type2 Diabetes Treatment"]
+  },
+  {
+    "question": "What complications can type 2 diabetes cause?",
+    "expected_sources": ["Nhs Type2 Diabetes Complications", "Nice Type2 Diabetes Complications"]
+  },
+  {
+    "question": "What support is available for people with type 2 diabetes?",
+    "expected_sources": ["Nhs Type2 Diabetes Support"]
+  },
+  {
+    "question": "Can type 2 diabetes go into remission?",
+    "expected_sources": ["Nhs Type2 Diabetes Path To Remission"]
+  },
+  {
+    "question": "How many people worldwide have diabetes?",
+    "expected_sources": ["Who Diabetes Fact Sheet"]
+  },
+  {
+    "question": "What is the global burden of diabetes according to the WHO?",
+    "expected_sources": ["Who Diabetes Fact Sheet"]
+  },
+  {
+    "question": "What individualised care should be offered to people with type 2 diabetes?",
+    "expected_sources": ["Nice Type2 Diabetes Individualised Care", "Nice Type2 Diabetes Person Centred Care"]
+  },
+  {
+    "question": "What education programmes should be offered after a type 2 diabetes diagnosis?",
+    "expected_sources": ["Nice Type2 Diabetes Education"]
+  },
+  {
+    "question": "What dietary advice is recommended for people with type 2 diabetes?",
+    "expected_sources": ["Nice Type2 Diabetes Dietary Advice"]
+  },
+  {
+    "question": "What HbA1c targets should be used to manage blood glucose in type 2 diabetes?",
+    "expected_sources": ["Nice Type2 Diabetes Blood Glucose Management"]
+  },
+  {
+    "question": "What is the first medicine offered for type 2 diabetes?",
+    "expected_sources": ["Nice Type2 Diabetes Initial Medicines"]
+  },
+  {
+    "question": "What medicines can be added if initial treatment does not control blood glucose?",
+    "expected_sources": ["Nice Type2 Diabetes Further Medication"]
+  },
+  {
+    "question": "How should new diabetes medicines be introduced to a patient?",
+    "expected_sources": ["Nice Type2 Diabetes How To Introduce Medicines"]
+  },
+  {
+    "question": "When should insulin-based treatment be considered for type 2 diabetes?",
+    "expected_sources": ["Nice Type2 Diabetes Insulin Based Treatments"]
+  },
+  {
+    "question": "How often should diabetes medicines be reviewed?",
+    "expected_sources": ["Nice Type2 Diabetes Reviewing Medicines"]
+  },
+  {
+    "question": "What is metformin used for?",
+    "expected_sources": ["Nhs Medicine Metformin About"]
+  },
+  {
+    "question": "How and when should I take metformin?",
+    "expected_sources": ["Nhs Medicine Metformin How And When To Take"]
+  },
+  {
+    "question": "What are the side effects of metformin?",
+    "expected_sources": ["Nhs Medicine Metformin Side Effects"]
+  },
+  {
+    "question": "Who can and cannot take metformin?",
+    "expected_sources": ["Nhs Medicine Metformin Who Can Take"]
+  },
+  {
+    "question": "Is metformin safe to take during pregnancy?",
+    "expected_sources": ["Nhs Medicine Metformin Pregnancy And Fertility"]
+  },
+  {
+    "question": "Can metformin be taken with other medicines?",
+    "expected_sources": ["Nhs Medicine Metformin Interactions"]
+  },
+  {
+    "question": "What are common questions people ask about metformin?",
+    "expected_sources": ["Nhs Medicine Metformin Common Questions"]
+  },
+  {
+    "question": "What is gliclazide used for?",
+    "expected_sources": ["Nhs Medicine Gliclazide About"]
+  },
+  {
+    "question": "What are the side effects of gliclazide?",
+    "expected_sources": ["Nhs Medicine Gliclazide Side Effects"]
+  },
+  {
+    "question": "Who can and cannot take gliclazide?",
+    "expected_sources": ["Nhs Medicine Gliclazide Who Can Take"]
+  },
+  {
+    "question": "Can gliclazide be taken with other medicines?",
+    "expected_sources": ["Nhs Medicine Gliclazide Interactions"]
+  },
+  {
+    "question": "What are the side effects of empagliflozin?",
+    "expected_sources": ["Nhs Medicine Empagliflozin Side Effects"]
+  },
+  {
+    "question": "Who can and cannot take empagliflozin?",
+    "expected_sources": ["Nhs Medicine Empagliflozin Who Can Take"]
+  },
+  {
+    "question": "Is empagliflozin safe during pregnancy or breastfeeding?",
+    "expected_sources": ["Nhs Medicine Empagliflozin Pregnancy And Fertility"]
+  },
+  {
+    "question": "What are the side effects of sitagliptin?",
+    "expected_sources": ["Nhs Medicine Sitagliptin Side Effects"]
+  },
+  {
+    "question": "How and when should I take sitagliptin?",
+    "expected_sources": ["Nhs Medicine Sitagliptin How And When To Take"]
+  },
+  {
+    "question": "What is dapagliflozin used for?",
+    "expected_sources": ["Nhs Medicine Dapagliflozin"]
+  },
+  {
+    "question": "What is insulin used for in type 2 diabetes?",
+    "expected_sources": ["Nhs Medicine Insulin For Type2 Diabetes", "Nhs Medicine Insulin Overview"]
+  },
+  {
+    "question": "What is insulin?",
+    "expected_sources": ["Nhs Medicine Insulin Overview"]
+  }
+]

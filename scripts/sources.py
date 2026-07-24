@@ -1,5 +1,6 @@
 """
-Manifest of trusted UK sources for the Type 2 diabetes knowledge base.
+Manifest of trusted official sources (UK government bodies + WHO) for the
+Type 2 diabetes knowledge base.
 
 Each entry describes where a document comes from, which extraction
 profile to use for that domain, and the licence it is published under.
@@ -22,6 +23,9 @@ DOMAIN_PROFILES = {
     "nidirect_gov_uk": {
         "content_selectors": ["article#main-article", "article.article-content"],
     },
+    "who_int": {
+        "content_selectors": ["article.sf-detail-body-wrapper", "main"],
+    },
 }
 
 # license identifiers, for the metadata sidecar written next to each file.
@@ -36,6 +40,11 @@ LICENSES = {
     "nidirect_crown_copyright": (
         "Crown copyright (Northern Ireland Executive, nidirect.gov.uk), "
         "reused under the Open Government Licence v3.0"
+    ),
+    "who_cc_by_nc_sa": (
+        "© World Health Organization - reused under Creative Commons "
+        "Attribution-NonCommercial-ShareAlike 3.0 IGO (CC BY-NC-SA 3.0 IGO). "
+        "See https://www.who.int/about/policies/publishing/copyright"
     ),
 }
 
@@ -163,6 +172,14 @@ SOURCES = [
         "url": "https://www.nidirect.gov.uk/conditions/type-2-diabetes",
         "domain_profile": "nidirect_gov_uk",
         "license": "nidirect_crown_copyright",
+    },
+    # --- WHO: global fact sheet (general/epidemiological, not UK-specific
+    # clinical recommendations, to avoid conflicting with NICE's guidance) ---
+    {
+        "slug": "who_diabetes_fact_sheet",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/diabetes",
+        "domain_profile": "who_int",
+        "license": "who_cc_by_nc_sa",
     },
     {
         "slug": "nhs_medicine_dapagliflozin",
