@@ -1,0 +1,1336 @@
+{
+  "600": {
+    "summary": {
+      "total_questions": 36,
+      "recall_at_1": 0.7777777777777778,
+      "recall_at_3": 0.8888888888888888,
+      "recall_at_5": 0.9444444444444444,
+      "mrr": 0.8365740740740741,
+      "chunk_count": 702
+    },
+    "results": [
+      {
+        "question": "What is type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Diabetes Overview",
+          "Nice Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview",
+          "Who Diabetes Fact Sheet",
+          "Nhs Type2 Diabetes Symptoms"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the symptoms of type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Symptoms",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Symptoms",
+          "Who Diabetes Fact Sheet",
+          "Nhs Type2 Diabetes Symptoms",
+          "Nidirect Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How is type 2 diabetes treated?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Treatment"
+        ],
+        "retrieved_sources": [
+          "Who Diabetes Fact Sheet",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Diabetes Overview 2",
+          "Nhs Diabetes Overview",
+          "Nhs Type2 Diabetes Treatment"
+        ],
+        "rank": 5,
+        "reciprocal_rank": 0.2,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": true
+      },
+      {
+        "question": "What complications can type 2 diabetes cause?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Complications",
+          "Nice Type2 Diabetes Complications"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Complications",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Complications",
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Diabetes Overview 2"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What support is available for people with type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Support"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nidirect Type2 Diabetes Overview",
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Education"
+        ],
+        "rank": null,
+        "reciprocal_rank": 0,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false
+      },
+      {
+        "question": "Can type 2 diabetes go into remission?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Path To Remission"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Type2 Diabetes Overview"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How many people worldwide have diabetes?",
+        "expected_sources": [
+          "Who Diabetes Fact Sheet"
+        ],
+        "retrieved_sources": [
+          "Who Diabetes Fact Sheet",
+          "Who Diabetes Fact Sheet",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Diabetes Overview",
+          "Nhs Diabetes Overview 2"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is the global burden of diabetes according to the WHO?",
+        "expected_sources": [
+          "Who Diabetes Fact Sheet"
+        ],
+        "retrieved_sources": [
+          "Who Diabetes Fact Sheet",
+          "Who Diabetes Fact Sheet",
+          "Nhs Diabetes Overview",
+          "Nhs Diabetes Overview",
+          "Nhs Diabetes Overview 2"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What individualised care should be offered to people with type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Individualised Care",
+          "Nice Type2 Diabetes Person Centred Care"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Individualised Care",
+          "Nice Type2 Diabetes Person Centred Care",
+          "Nice Type2 Diabetes Individualised Care",
+          "Nhs Type2 Diabetes Treatment",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What education programmes should be offered after a type 2 diabetes diagnosis?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Education"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Education",
+          "Nice Type2 Diabetes Education",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nice Type2 Diabetes Insulin Based Treatments"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What dietary advice is recommended for people with type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Dietary Advice"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Dietary Advice",
+          "Nice Type2 Diabetes Dietary Advice",
+          "Nice Type2 Diabetes Person Centred Care",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Type2 Diabetes Treatment"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What HbA1c targets should be used to manage blood glucose in type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Blood Glucose Management"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Blood Glucose Management"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is the first medicine offered for type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 4,
+        "reciprocal_rank": 0.25,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": true
+      },
+      {
+        "question": "What medicines can be added if initial treatment does not control blood glucose?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Further Medication",
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Further Medication",
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How should new diabetes medicines be introduced to a patient?",
+        "expected_sources": [
+          "Nice Type2 Diabetes How To Introduce Medicines"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes How To Introduce Medicines",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes How To Introduce Medicines",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "When should insulin-based treatment be considered for type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Insulin Based Treatments"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "rank": 3,
+        "reciprocal_rank": 0.3333333333333333,
+        "hit_at_1": false,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How often should diabetes medicines be reviewed?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Reviewing Medicines"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nice Type2 Diabetes Reviewing Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is metformin used for?",
+        "expected_sources": [
+          "Nhs Medicine Metformin About"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Empagliflozin About",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Type2 Diabetes Treatment"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How and when should I take metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin How And When To Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin How And When To Take",
+          "Nhs Medicine Metformin How And When To Take",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Who Can Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Side Effects",
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Metformin Side Effects",
+          "Nhs Medicine Metformin How And When To Take",
+          "Nhs Medicine Metformin Common Questions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Who can and cannot take metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Who Can Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Who Can Take",
+          "Nhs Medicine Empagliflozin About",
+          "Nhs Medicine Metformin Common Questions",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Is metformin safe to take during pregnancy?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Pregnancy And Fertility"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Pregnancy And Fertility",
+          "Nhs Medicine Gliclazide Pregnancy And Fertility",
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility",
+          "Nhs Medicine Metformin Pregnancy And Fertility",
+          "Nhs Medicine Dapagliflozin"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Can metformin be taken with other medicines?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Interactions"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Interactions",
+          "Nhs Medicine Metformin Interactions",
+          "Nhs Medicine Empagliflozin About",
+          "Nhs Medicine Metformin Common Questions",
+          "Nice Type2 Diabetes How To Introduce Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are common questions people ask about metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Common Questions"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Interactions",
+          "Nhs Medicine Metformin Side Effects",
+          "Nhs Medicine Metformin Common Questions",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 3,
+        "reciprocal_rank": 0.3333333333333333,
+        "hit_at_1": false,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is gliclazide used for?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide About"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide About",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Who Can Take",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Interactions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of gliclazide?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide Side Effects",
+          "Nhs Medicine Gliclazide Side Effects",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Gliclazide About",
+          "Nhs Medicine Gliclazide Common Questions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Who can and cannot take gliclazide?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide Who Can Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide Who Can Take",
+          "Nhs Medicine Sitagliptin Who Can Take",
+          "Nhs Medicine Gliclazide About",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Common Questions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Can gliclazide be taken with other medicines?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide Interactions"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide Interactions",
+          "Nhs Medicine Gliclazide Interactions",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Empagliflozin Common Questions",
+          "Nhs Medicine Gliclazide Side Effects"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of empagliflozin?",
+        "expected_sources": [
+          "Nhs Medicine Empagliflozin Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Empagliflozin Side Effects",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Empagliflozin Side Effects",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Empagliflozin Who Can Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Who can and cannot take empagliflozin?",
+        "expected_sources": [
+          "Nhs Medicine Empagliflozin Who Can Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Empagliflozin Who Can Take",
+          "Nhs Medicine Empagliflozin Who Can Take",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Empagliflozin About",
+          "Nhs Medicine Sitagliptin Who Can Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Is empagliflozin safe during pregnancy or breastfeeding?",
+        "expected_sources": [
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility",
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Gliclazide Pregnancy And Fertility",
+          "Nhs Medicine Metformin Pregnancy And Fertility"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of sitagliptin?",
+        "expected_sources": [
+          "Nhs Medicine Sitagliptin Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Sitagliptin Side Effects",
+          "Nhs Medicine Sitagliptin Side Effects",
+          "Nhs Medicine Sitagliptin Common Questions",
+          "Nhs Medicine Sitagliptin Common Questions",
+          "Nhs Medicine Sitagliptin Interactions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How and when should I take sitagliptin?",
+        "expected_sources": [
+          "Nhs Medicine Sitagliptin How And When To Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Sitagliptin Common Questions",
+          "Nhs Medicine Sitagliptin How And When To Take",
+          "Nhs Medicine Sitagliptin How And When To Take",
+          "Nhs Medicine Sitagliptin Who Can Take",
+          "Nhs Medicine Sitagliptin Common Questions"
+        ],
+        "rank": 2,
+        "reciprocal_rank": 0.5,
+        "hit_at_1": false,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is dapagliflozin used for?",
+        "expected_sources": [
+          "Nhs Medicine Dapagliflozin"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Empagliflozin About",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is insulin used for in type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nhs Medicine Insulin Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "rank": 2,
+        "reciprocal_rank": 0.5,
+        "hit_at_1": false,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is insulin?",
+        "expected_sources": [
+          "Nhs Medicine Insulin Overview"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Further Medication",
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Medicine Insulin For Type2 Diabetes"
+        ],
+        "rank": null,
+        "reciprocal_rank": 0,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false
+      }
+    ]
+  },
+  "1300": {
+    "summary": {
+      "total_questions": 36,
+      "recall_at_1": 0.8888888888888888,
+      "recall_at_3": 0.9444444444444444,
+      "recall_at_5": 0.9444444444444444,
+      "mrr": 0.9166666666666666,
+      "chunk_count": 297
+    },
+    "results": [
+      {
+        "question": "What is type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Diabetes Overview",
+          "Nice Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Symptoms",
+          "Who Diabetes Fact Sheet",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the symptoms of type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Symptoms",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Symptoms",
+          "Nidirect Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Symptoms",
+          "Nice Type2 Diabetes Complications"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How is type 2 diabetes treated?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Treatment"
+        ],
+        "retrieved_sources": [
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Diabetes Overview 2",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Diabetes Overview"
+        ],
+        "rank": 2,
+        "reciprocal_rank": 0.5,
+        "hit_at_1": false,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What complications can type 2 diabetes cause?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Complications",
+          "Nice Type2 Diabetes Complications"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Complications",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Overview",
+          "Who Diabetes Fact Sheet",
+          "Nhs Type2 Diabetes Complications"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What support is available for people with type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Support"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Treatment",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Path To Remission",
+          "Who Diabetes Fact Sheet",
+          "Nhs Type2 Diabetes Treatment"
+        ],
+        "rank": null,
+        "reciprocal_rank": 0,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false
+      },
+      {
+        "question": "Can type 2 diabetes go into remission?",
+        "expected_sources": [
+          "Nhs Type2 Diabetes Path To Remission"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nhs Type2 Diabetes Treatment",
+          "Nidirect Type2 Diabetes Overview"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How many people worldwide have diabetes?",
+        "expected_sources": [
+          "Who Diabetes Fact Sheet"
+        ],
+        "retrieved_sources": [
+          "Who Diabetes Fact Sheet",
+          "Who Diabetes Fact Sheet",
+          "Nidirect Type2 Diabetes Overview",
+          "Nidirect Type2 Diabetes Overview",
+          "Nhs Diabetes Overview"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is the global burden of diabetes according to the WHO?",
+        "expected_sources": [
+          "Who Diabetes Fact Sheet"
+        ],
+        "retrieved_sources": [
+          "Who Diabetes Fact Sheet",
+          "Nice Type2 Diabetes Education",
+          "Who Diabetes Fact Sheet",
+          "Nhs Diabetes Overview",
+          "Nhs Diabetes Overview 2"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What individualised care should be offered to people with type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Individualised Care",
+          "Nice Type2 Diabetes Person Centred Care"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Individualised Care",
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Person Centred Care",
+          "Nice Type2 Diabetes Person Centred Care"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What education programmes should be offered after a type 2 diabetes diagnosis?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Education"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Education",
+          "Nice Type2 Diabetes Education",
+          "Nhs Type2 Diabetes Path To Remission",
+          "Nhs Type2 Diabetes Treatment",
+          "Nhs Type2 Diabetes Path To Remission"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What dietary advice is recommended for people with type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Dietary Advice"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Dietary Advice",
+          "Nice Type2 Diabetes Dietary Advice",
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Overview",
+          "Nhs Medicine Empagliflozin Common Questions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What HbA1c targets should be used to manage blood glucose in type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Blood Glucose Management"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Blood Glucose Management",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is the first medicine offered for type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes How To Introduce Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What medicines can be added if initial treatment does not control blood glucose?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How should new diabetes medicines be introduced to a patient?",
+        "expected_sources": [
+          "Nice Type2 Diabetes How To Introduce Medicines"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes How To Introduce Medicines",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes How To Introduce Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "When should insulin-based treatment be considered for type 2 diabetes?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Insulin Based Treatments"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Further Medication",
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nice Type2 Diabetes Reviewing Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How often should diabetes medicines be reviewed?",
+        "expected_sources": [
+          "Nice Type2 Diabetes Reviewing Medicines"
+        ],
+        "retrieved_sources": [
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nice Type2 Diabetes Reviewing Medicines",
+          "Nhs Type2 Diabetes Treatment",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nhs Medicine Insulin For Type2 Diabetes"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is metformin used for?",
+        "expected_sources": [
+          "Nhs Medicine Metformin About"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Interactions",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How and when should I take metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin How And When To Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin How And When To Take",
+          "Nhs Medicine Metformin How And When To Take",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Who Can Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Side Effects",
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Metformin Side Effects",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin How And When To Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Who can and cannot take metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Who Can Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Who Can Take",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nhs Medicine Metformin How And When To Take",
+          "Nhs Medicine Metformin Common Questions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Is metformin safe to take during pregnancy?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Pregnancy And Fertility"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Pregnancy And Fertility",
+          "Nhs Medicine Gliclazide Pregnancy And Fertility",
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility",
+          "Nhs Medicine Metformin Pregnancy And Fertility",
+          "Nhs Medicine Metformin Interactions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Can metformin be taken with other medicines?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Interactions"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Interactions",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Metformin Pregnancy And Fertility",
+          "Nhs Medicine Metformin Side Effects"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are common questions people ask about metformin?",
+        "expected_sources": [
+          "Nhs Medicine Metformin Common Questions"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin Common Questions",
+          "Nhs Medicine Metformin About",
+          "Nhs Medicine Metformin Side Effects",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is gliclazide used for?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide About"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide About",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Who Can Take",
+          "Nhs Medicine Gliclazide Interactions"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of gliclazide?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide Side Effects",
+          "Nhs Medicine Gliclazide Side Effects",
+          "Nhs Medicine Sitagliptin Side Effects",
+          "Nhs Medicine Empagliflozin Side Effects",
+          "Nhs Medicine Dapagliflozin"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Who can and cannot take gliclazide?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide Who Can Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide Who Can Take",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Sitagliptin Who Can Take",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Empagliflozin Who Can Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Can gliclazide be taken with other medicines?",
+        "expected_sources": [
+          "Nhs Medicine Gliclazide Interactions"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Gliclazide Interactions",
+          "Nhs Medicine Gliclazide Interactions",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Common Questions",
+          "Nhs Medicine Gliclazide Side Effects"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of empagliflozin?",
+        "expected_sources": [
+          "Nhs Medicine Empagliflozin Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Empagliflozin Side Effects",
+          "Nhs Medicine Empagliflozin Side Effects",
+          "Nhs Medicine Empagliflozin Common Questions",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Dapagliflozin"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Who can and cannot take empagliflozin?",
+        "expected_sources": [
+          "Nhs Medicine Empagliflozin Who Can Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Empagliflozin Who Can Take",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Sitagliptin Who Can Take",
+          "Nhs Medicine Empagliflozin Common Questions",
+          "Nhs Medicine Gliclazide Who Can Take"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "Is empagliflozin safe during pregnancy or breastfeeding?",
+        "expected_sources": [
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility",
+          "Nhs Medicine Empagliflozin Pregnancy And Fertility",
+          "Nhs Medicine Gliclazide Pregnancy And Fertility",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Metformin Pregnancy And Fertility"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What are the side effects of sitagliptin?",
+        "expected_sources": [
+          "Nhs Medicine Sitagliptin Side Effects"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Sitagliptin Side Effects",
+          "Nhs Medicine Sitagliptin Side Effects",
+          "Nhs Medicine Sitagliptin Common Questions",
+          "Nhs Medicine Sitagliptin Interactions",
+          "Nhs Medicine Sitagliptin About"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "How and when should I take sitagliptin?",
+        "expected_sources": [
+          "Nhs Medicine Sitagliptin How And When To Take"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Sitagliptin How And When To Take",
+          "Nhs Medicine Sitagliptin Common Questions",
+          "Nhs Medicine Sitagliptin Common Questions",
+          "Nhs Medicine Sitagliptin Who Can Take",
+          "Nhs Medicine Sitagliptin Side Effects"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is dapagliflozin used for?",
+        "expected_sources": [
+          "Nhs Medicine Dapagliflozin"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Dapagliflozin",
+          "Nhs Medicine Empagliflozin About",
+          "Nice Type2 Diabetes Initial Medicines",
+          "Nice Type2 Diabetes Initial Medicines"
+        ],
+        "rank": 1,
+        "reciprocal_rank": 1.0,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is insulin used for in type 2 diabetes?",
+        "expected_sources": [
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nhs Medicine Insulin Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Type2 Diabetes Overview",
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Insulin Based Treatments",
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "rank": 2,
+        "reciprocal_rank": 0.5,
+        "hit_at_1": false,
+        "hit_at_3": true,
+        "hit_at_5": true
+      },
+      {
+        "question": "What is insulin?",
+        "expected_sources": [
+          "Nhs Medicine Insulin Overview"
+        ],
+        "retrieved_sources": [
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nhs Medicine Insulin For Type2 Diabetes",
+          "Nice Type2 Diabetes Further Medication",
+          "Nidirect Type2 Diabetes Overview",
+          "Nice Type2 Diabetes Further Medication"
+        ],
+        "rank": null,
+        "reciprocal_rank": 0,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false
+      }
+    ]
+  }
+}

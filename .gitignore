@@ -7,5 +7,10 @@ data/processed/
 .DS_Store
 whattoremember.txt
 frontend/dist/
-frontend/node_modules/
 backend/__pycache__/
+.claude
+frontend/node_modules/
+frontend/.next/
+backend-venv/
+venv/
+.env

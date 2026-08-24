@@ -121,6 +121,13 @@ button {
   color: var(--forest);
 }
 
+.dsBrandMark img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 .dsBrandText {
   display: flex;
   flex-direction: column;
@@ -902,9 +909,19 @@ box-shadow: 0 8px 24px rgba(90, 82, 70, 0.18);
 }
 
 .siteLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: "Roboto", ui-sans-serif, system-ui, sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.siteLogoMark {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .siteNav {

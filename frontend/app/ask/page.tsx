@@ -301,9 +301,9 @@ export default function AskPage() {
     <main className={`dsShell ${isRailCollapsed ? "railCollapsed" : ""}`}>
       <aside className="dsRail" aria-label="DiaSift session panel">
         <div className="dsBrand">
-          {/* <span className="dsBrandMark">
-            <Icon name="spark" />
-          </span> */}
+          <span className="dsBrandMark">
+            <img src="/logo-icon.png" alt="DiaSift" width={24} height={24} />
+          </span>
           <div className="dsBrandText">
             <span>DiaSift</span>
             <small>Type 2 diabetes assistant</small>

@@ -82,10 +82,10 @@ def create_source_name(file_path: Path) -> str:
 
 def ingest_documents() -> None:
     """
-    1. Read every .txt file from data/raw.
-    2. Clean its text.
-    3. Split it into chunks.
-    4. Save the chunks to chunks.json.
+    1. This function reads every .txt file from data/raw.
+    2. Cleans its text.
+    3. Splits it into chunks.
+    4. and then saves the chunks to chunks.json.
     """
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
