@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -301,13 +302,9 @@ export default function AskPage() {
     <main className={`dsShell ${isRailCollapsed ? "railCollapsed" : ""}`}>
       <aside className="dsRail" aria-label="DiaSift session panel">
         <div className="dsBrand">
-          <span className="dsBrandMark">
-            <img src="/logo-icon.png" alt="DiaSift" width={24} height={24} />
-          </span>
-          <div className="dsBrandText">
-            <span>DiaSift</span>
-            <small>Type 2 diabetes assistant</small>
-          </div>
+          <Link href="/" aria-label="Go to homepage">
+            <img src="/logo-full.png" alt="DiaSift" className="siteLogoMark" />
+          </Link>
           {/* <button
             className="dsCollapse"
             type="button"

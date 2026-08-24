@@ -19,10 +19,7 @@ function SiteHeader() {
   return (
     <header className="siteHeader">
       <div className="siteHeaderInner">
-        <span className="siteLogo">
-          <img src="/logo-icon.png" alt="" width={28} height={28} className="siteLogoMark" />
-          DiaSift
-        </span>
+        <img src="/logo-full.png" alt="" className="siteLogoMark" />
 
         <nav className="siteNav" aria-label="Primary">
           <a href="#how-it-works">How it works</a>
