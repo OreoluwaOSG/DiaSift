@@ -16,6 +16,10 @@ export default function LandingPage() {
 }
 
 function SiteHeader() {
+  const API_BASE_URL = process.env.DIASIFT_API_URL ?? "http://127.0.0.1:8000";
+
+
+  console.log("api base url here>>>", API_BASE_URL);
   return (
     <header className="siteHeader">
       <div className="siteHeaderInner">
@@ -77,7 +81,7 @@ function Hero() {
           <p className="demoAnswer">
             HbA1c reflects your average blood glucose over the past two to three
             months. It&apos;s measured because day-to-day readings move around,
-            while HbA1c reveals the longer pattern &mdash; so clinicians can see
+            while HbA1c reveals the longer pattern; so clinicians can see
             how well your diabetes is being managed over time.
           </p>
 
