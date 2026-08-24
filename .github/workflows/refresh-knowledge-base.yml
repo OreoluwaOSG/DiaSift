@@ -1,0 +1,59 @@
+name: Refresh knowledge base
+
+# Keeps data/raw/ in sync with the live NHS/NICE pages it's sourced from.
+# Runs weekly and opens a PR if the fetched content changed, so a human
+# reviews any wording/guidance changes before they land in the RAG
+# knowledge base used for medical information.
+
+on:
+  schedule:
+    # Mondays 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install fetch/ingest dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Fetch latest NHS/NICE sources
+        working-directory: scripts
+        run: python fetch_sources.py
+
+      - name: Re-chunk documents (smoke test ingestion)
+        working-directory: scripts
+        run: python ingest_documents.py
+
+      - name: Open a PR if sources changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: refresh NHS/NICE source documents"
+          title: "Weekly knowledge base refresh"
+          body: |
+            Automated refresh of `data/raw/` from the live NHS/NICE pages
+            listed in `scripts/sources.py`.
+
+            Please review the diff for any clinically meaningful wording
+            or guidance changes before merging, then run
+            `python scripts/build_index.py` locally to rebuild the vector
+            store.
+          branch: automated/refresh-knowledge-base
+          add-paths: |
+            data/raw/*.txt
+            data/raw/*.meta.json
+          delete-branch: true

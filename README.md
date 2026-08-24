@@ -144,7 +144,7 @@ npm install
 Start the FastAPI backend from the project root:
 
 ```bash
-.venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+.backend-venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
 Start the frontend:
@@ -172,7 +172,8 @@ The project will use trusted public Type 2 Diabetes guidance sources such as:
 
 NHS
 NICE
-Diabetes UK, if suitable
+nidirect
+WHO
 
 All sources will be recorded in:
 

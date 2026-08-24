@@ -140,12 +140,18 @@ def label_evidence_strength(question: str, results: list[dict]) -> dict:
     signals = calculate_result_support(question, results)
 
     # Strong evidence means the best results are clearly relevant and supported
-    # by more than one chunk.
+    # by more than one chunk. These bars were raised from an earlier, looser
+    # version (top>=1.2, avg3>=0.7, ratio>=0.5, support>=2) after evaluation
+    # showed that version labeled almost everything "Strong" - including
+    # questions about topics the corpus does not actually cover (evaluation/
+    # abstention_questions.json, "no_evidence" category). The new bars were
+    # picked by comparing real signal distributions between known-answerable
+    # and known-uncovered questions (see evaluation/run_abstention_eval.py).
     if (
-        signals["top_score"] >= 1.2
-        and signals["average_top_3_score"] >= 0.7
-        and signals["matched_term_ratio"] >= 0.5
-        and signals["supporting_result_count"] >= 2
+        signals["top_score"] >= 1.8
+        and signals["average_top_3_score"] >= 1.3
+        and signals["matched_term_ratio"] >= 0.85
+        and signals["supporting_result_count"] >= 4
     ):
         return {
             "label": STRONG_EVIDENCE,

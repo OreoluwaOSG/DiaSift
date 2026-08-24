@@ -1,6 +1,8 @@
+beautifulsoup4
 chromadb
 fastapi
 openai
 pydantic
+requests
 sentence-transformers
 uvicorn[standard]

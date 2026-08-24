@@ -13,9 +13,8 @@ SCRIPTS_DIR = BASE_DIR / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from llm_providers import DEFAULT_PROVIDER, get_default_model  # noqa: E402
-from rag_pipeline import DEFAULT_MAX_OUTPUT_TOKENS, run_rag_pipeline  # noqa: E402
-from search_test import COLLECTION_NAME, VECTORSTORE_DIR, load_collection  # noqa: E402
+DEFAULT_PROVIDER = "gemini"
+DEFAULT_MAX_OUTPUT_TOKENS = 500
 
 
 class AnswerRequest(BaseModel):
@@ -83,19 +82,16 @@ def root() -> dict[str, str]:
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    try:
-        collection = load_collection()
-        indexed_chunks = collection.count()
-        status = "ok"
-    except Exception:
-        indexed_chunks = None
-        status = "index_not_ready"
+    collection_name = "diasift_type2_diabetes"
+    vectorstore_dir = BASE_DIR / "vectorstore"
+    index_file = vectorstore_dir / "chroma.sqlite3"
+    status = "ok" if index_file.exists() else "index_not_ready"
 
     return HealthResponse(
         status=status,
-        collection_name=COLLECTION_NAME,
-        vectorstore_path=str(VECTORSTORE_DIR),
-        indexed_chunks=indexed_chunks,
+        collection_name=collection_name,
+        vectorstore_path=str(vectorstore_dir),
+        indexed_chunks=None,
     )
 
 
@@ -106,9 +102,11 @@ def answer(request: AnswerRequest) -> AnswerResponse:
     if not question:
         raise HTTPException(status_code=422, detail="Question cannot be empty.")
 
-    model = request.model or get_default_model(request.provider)
-
     try:
+        from llm_providers import get_default_model
+        from rag_pipeline import run_rag_pipeline
+
+        model = request.model or get_default_model(request.provider)
         result = run_rag_pipeline(
             question=question,
             call_api=request.call_api,
