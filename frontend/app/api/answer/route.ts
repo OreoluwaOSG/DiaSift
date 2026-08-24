@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const API_BASE_URL = process.env.DIASIFT_API_URL ?? "http://127.0.0.1:8000";
 
 export async function POST(request: Request) {
+  console.log("api base url here>>>", API_BASE_URL);
   let body: unknown;
 
   try {
