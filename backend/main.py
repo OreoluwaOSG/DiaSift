@@ -13,8 +13,8 @@ SCRIPTS_DIR = BASE_DIR / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-DEFAULT_PROVIDER = "gemini"
-DEFAULT_MAX_OUTPUT_TOKENS = 500
+DEFAULT_PROVIDER = "openai"
+DEFAULT_MAX_OUTPUT_TOKENS = 800
 
 
 class AnswerRequest(BaseModel):
@@ -43,6 +43,7 @@ class AnswerResponse(BaseModel):
     provider: str
     model: str
     api_called: bool
+    fallback_used: bool = False
     usage_estimate: dict[str, int]
     system_prompt: str | None = None
     user_prompt: str | None = None

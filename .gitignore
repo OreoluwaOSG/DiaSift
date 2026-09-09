@@ -7,7 +7,6 @@ data/processed/
 whattoremember.txt
 frontend/dist/
 backend/__pycache__/
-.claude
 frontend/node_modules/
 frontend/.next/
 backend-venv/

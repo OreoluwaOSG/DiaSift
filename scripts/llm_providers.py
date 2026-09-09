@@ -6,10 +6,9 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-DEFAULT_PROVIDER = "gemini"
+DEFAULT_PROVIDER = "openai"
+FALLBACK_PROVIDER = "gemini"
 
-# Gemini is the current default because it has a free tier.
-# You can switch providers later without changing the RAG pipeline.
 DEFAULT_MODELS = {
     "gemini": "gemini-2.5-flash",
     "openai": "gpt-5.4-nano",
@@ -46,6 +45,20 @@ def load_env_file(env_path: Path | None = None) -> None:
 
 def get_default_model(provider: str) -> str:
     """Get the default model for a provider."""
+    load_env_file()
+
+    provider_env_var = f"DIASIFT_{provider.upper()}_MODEL"
+    configured_model = os.getenv(provider_env_var)
+
+    if configured_model:
+        return configured_model
+
+    # Preserve the original shared model setting for CLI users.
+    if os.getenv("DIASIFT_LLM_PROVIDER") == provider:
+        legacy_model = os.getenv("DIASIFT_LLM_MODEL")
+        if legacy_model:
+            return legacy_model
+
     return DEFAULT_MODELS.get(provider, "")
 
 
@@ -79,7 +92,13 @@ def extract_text_from_gemini_response(response_data: dict) -> str:
             if isinstance(text, str) and text.strip():
                 text_parts.append(text.strip())
 
-        if finish_reason and finish_reason not in ("STOP", "MAX_TOKENS"):
+        if finish_reason == "MAX_TOKENS":
+            raise RuntimeError(
+                "Gemini stopped before completing the answer because it reached "
+                "the output-token limit."
+            )
+
+        if finish_reason and finish_reason != "STOP":
             raise RuntimeError(f"Gemini did not return answer text. Finish reason: {finish_reason}")
 
     if text_parts:
@@ -174,11 +193,7 @@ def call_openai_api(
     user_prompt: str,
     max_output_tokens: int,
 ) -> str:
-    """
-    Call OpenAI if you choose to enable it later.
-
-    This keeps OpenAI support separate from the main RAG flow.
-    """
+    """Call OpenAI using the API key in OPENAI_API_KEY."""
     load_env_file()
 
     try:
@@ -201,7 +216,15 @@ def call_openai_api(
         max_output_tokens=max_output_tokens,
     )
 
-    return response.output_text
+    if response.status == "incomplete":
+        details = response.incomplete_details
+        reason = details.reason if details else "unknown"
+        raise RuntimeError(f"OpenAI returned an incomplete answer. Reason: {reason}")
+
+    if not response.output_text.strip():
+        raise RuntimeError("OpenAI returned a response with no answer text.")
+
+    return response.output_text.strip()
 
 
 def call_llm(

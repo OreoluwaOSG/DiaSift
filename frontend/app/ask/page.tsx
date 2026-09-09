@@ -37,6 +37,7 @@ type AnswerResponse = {
   provider: string;
   model: string;
   api_called: boolean;
+  fallback_used: boolean;
   usage_estimate: {
     input_tokens: number;
     max_output_tokens: number;
@@ -244,9 +245,7 @@ export default function AskPage() {
         },
         body: JSON.stringify({
           question: trimmedQuestion,
-          provider: "gemini",
           call_api: true,
-          max_output_tokens: 500,
         }),
       });
       const data = await response.json();
@@ -559,6 +558,7 @@ function TimelineItem({ message }: { message: ChatMessage }) {
             <p className="techMeta">
               {message.result.provider} · {message.result.model} ·{" "}
               {message.result.api_called ? "LLM answer" : "Retrieved evidence"}
+              {message.result.fallback_used ? " · backup provider used" : ""}
             </p>
           </details>
         ) : null}

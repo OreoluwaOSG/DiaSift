@@ -4,14 +4,14 @@ import os
 import sys
 
 from evidence_label import NO_CLEAR_EVIDENCE, label_evidence_strength
-from llm_providers import DEFAULT_PROVIDER, call_llm, get_default_model
+from llm_providers import FALLBACK_PROVIDER, DEFAULT_PROVIDER, call_llm, get_default_model
 from prompts import build_system_prompt, build_user_prompt, get_chunk_source, get_chunk_text
 from safety_filter import is_unsafe_medical_question
 from scope_filter import SCOPE_REFUSAL, check_question_scope
 from search_test import search_documents
 
 
-DEFAULT_MAX_OUTPUT_TOKENS = 500
+DEFAULT_MAX_OUTPUT_TOKENS = 800
 
 
 def estimate_tokens(text: str) -> int:
@@ -244,14 +244,40 @@ def run_rag_pipeline(
             "usage_estimate": usage_estimate,
         }
 
+    fallback_used = False
+
     if call_api:
-        answer = call_llm(
-            provider=provider,
-            model=model,
-            system_prompt=system_prompt,
-            user_prompt=user_prompt,
-            max_output_tokens=max_output_tokens,
-        )
+        try:
+            answer = call_llm(
+                provider=provider,
+                model=model,
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                max_output_tokens=max_output_tokens,
+            )
+        except RuntimeError:
+            if provider != DEFAULT_PROVIDER or FALLBACK_PROVIDER == provider:
+                raise
+
+            fallback_model = get_default_model(FALLBACK_PROVIDER)
+
+            try:
+                answer = call_llm(
+                    provider=FALLBACK_PROVIDER,
+                    model=fallback_model,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    max_output_tokens=max_output_tokens,
+                )
+            except RuntimeError as fallback_error:
+                raise RuntimeError(
+                    f"{DEFAULT_PROVIDER.title()} failed and the "
+                    f"{FALLBACK_PROVIDER.title()} backup also failed."
+                ) from fallback_error
+
+            provider = FALLBACK_PROVIDER
+            model = fallback_model
+            fallback_used = True
 
         if not answer.strip():
             raise RuntimeError(
@@ -277,6 +303,7 @@ def run_rag_pipeline(
         "provider": provider,
         "model": model,
         "api_called": api_called,
+        "fallback_used": fallback_used,
         "usage_estimate": usage_estimate,
         "system_prompt": system_prompt,
         "user_prompt": user_prompt,

@@ -1,126 +1,126 @@
 # Diasift
 
-Diasift is a web based Type 2 Diabetes guideline assistant. It uses Retrieval Augmented Generation to search trusted medical guidance documents and provide evidence based answers with citations.
+Diasift is a web-based Type 2 Diabetes guideline assistant.
 
-The project focuses on Type 2 Diabetes guidance from public sources such as NHS and NICE. It is designed for educational use only and does not diagnose users, prescribe medication, or replace healthcare professionals.
+It uses Retrieval Augmented Generation (RAG) to search trusted public health guidance and return answers with citations. The project is for education only. It does not diagnose users, prescribe medicine, give personal treatment advice, or replace a healthcare professional.
 
 ## Project Aim
 
-The aim of Diasift is to investigate how Retrieval Augmented Generation can be used to provide safer and more grounded answers to Type 2 Diabetes guideline questions.
+The aim of Diasift is to explore how RAG can make health information answers safer, clearer, and better supported by evidence.
 
 ## Main Features
 
-- Search Type 2 Diabetes guidance documents
-- Retrieve relevant evidence from trusted sources
-- Generate answers using retrieved documents
-- Show citations for answers
-- Label evidence strength as:
-  - Strong evidence
-  - Partial evidence
-  - No clear evidence
-- Refuse unsafe or unsupported medical questions
+- Searches Type 2 Diabetes guidance documents.
+- Retrieves relevant evidence from trusted sources.
+- Generates answers using the retrieved evidence.
+- Shows citations for the sources used.
+- Labels the evidence as `Strong evidence`, `Partial evidence`, or `No clear evidence`.
+- Refuses unsafe, personal, or unsupported medical questions.
+
+## Data Sources
+
+Diasift uses public Type 2 Diabetes guidance from:
+
+- NHS
+- NICE
+- WHO
+- nidirect
+
+The collected source files are stored in `data/raw/`.
 
 ## Project Structure
 
 ```text
 diasift/
-  backend/
-  frontend/
-  data/
-    raw/
-    processed/
-  vectorstore/
-  scripts/
-  evaluation/
-  docs/
+  backend/       FastAPI backend
+  frontend/      Next.js web interface
+  data/          Raw and processed source documents
+  vectorstore/   ChromaDB vector database
+  scripts/       Ingestion, indexing, retrieval, and RAG scripts
+  evaluation/    Test questions and evaluation results
+  docs/          Project notes
   README.md
+```
 
-## Folder Explanation
+## How It Works
 
-- `backend/` contains the FastAPI backend.
-- `frontend/` contains the web interface.
-- `data/raw/` contains the original Type 2 Diabetes source documents.
-- `data/processed/` contains cleaned and chunked document data.
-- `vectorstore/` contains the ChromaDB vector database files.
-- `scripts/` contains Python scripts for processing, indexing and testing.
-- `evaluation/` contains test questions and evaluation results.
-- `docs/` contains project notes, source records and design decisions.
+1. Source documents are saved in `data/raw/`.
+2. `scripts/ingest_documents.py` cleans the documents and splits them into chunks.
+3. `scripts/build_index.py` creates a ChromaDB vector index from the chunks.
+4. A user asks a question.
+5. Diasift checks whether the question is in scope and safe to answer.
+6. Diasift retrieves the most relevant chunks.
+7. Diasift labels the strength of the evidence.
+8. If the evidence is suitable, Diasift prepares an answer with citations.
+9. If the question is unsafe or unsupported, Diasift refuses to answer directly.
 
+## Setup
 
-Completed so far:
-
-- Project folder structure created
-- Initial Type 2 Diabetes documents collected
-- Document ingestion script created
-- Documents can be cleaned and split into chunks
-
-Next stage:
-
-- Build a vector index using ChromaDB
-- Test semantic search on the document chunks
-
-## How to Run the Current Script
-
-Make sure you are inside the project folder:
+Create and activate a Python virtual environment:
 
 ```bash
-cd diasift
+python3 -m venv backend-venv
+source backend-venv/bin/activate
 ```
 
-Run the document ingestion script:
+Install the Python dependencies:
 
 ```bash
-python3 scripts/ingest_documents.py
+python -m pip install -r requirements.txt
 ```
 
-This reads .txt files from:
+Install the frontend dependencies:
 
-```text
-data/raw/
+```bash
+cd frontend
+npm install
+cd ..
 ```
 
-and creates:
+## Build the Knowledge Base
 
-```text
-data/processed/chunks.json
+Run the ingestion script:
+
+```bash
+python scripts/ingest_documents.py
 ```
 
 Build the vector index:
 
 ```bash
-python3 scripts/build_index.py
+python scripts/build_index.py
 ```
 
-Test the RAG pipeline without calling an LLM:
+These commands create the processed chunks and the ChromaDB index used by the RAG pipeline.
+
+## Test the RAG Pipeline
+
+Run a dry test without calling an external LLM API:
 
 ```bash
-python3 scripts/rag_pipeline.py "What is type 2 diabetes?"
+python scripts/rag_pipeline.py "What is type 2 diabetes?"
 ```
 
-## FastAPI Backend
+By default, this returns retrieved evidence and metadata without making a paid or external model call.
 
-Install the Python dependencies:
+## Run the Backend
+
+Start the FastAPI backend from the project root:
 
 ```bash
-python3 -m pip install -r requirements.txt
+backend-venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-Start the backend:
-
-```bash
-python -m uvicorn backend.main:app --reload
-```
-
-Open the API docs at:
+Open the API documentation at:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Useful endpoints:
+Main endpoints:
 
-- `GET /health` checks whether the vector index is available.
-- `POST /answer` runs the RAG pipeline.
+- `GET /health`
+- `POST /answer`
 
 Example request:
 
@@ -130,72 +130,69 @@ curl -X POST http://127.0.0.1:8000/answer \
   -d '{"question":"What is type 2 diabetes?","call_api":false}'
 ```
 
-Set `call_api` to `true` when you want the backend to call the configured LLM provider. For Gemini, add `GEMINI_API_KEY` to your environment or a local `.env` file.
+## Run the Frontend
 
-## Next.js Frontend
-
-Install the frontend dependencies:
+In a second terminal, start the Next.js frontend:
 
 ```bash
 cd frontend
-npm install
-```
-
-Start the FastAPI backend from the project root:
-
-```bash
-.backend-venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
-```
-
-Start the frontend:
-
-```bash
 npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
-Open the chat page at:
+Open the app at:
 
 ```text
 http://127.0.0.1:3000
 ```
 
-The frontend proxies requests to the backend with:
+The frontend sends requests to the backend through:
 
 - `GET /api/health`
 - `POST /api/answer`
 
-By default, the proxy expects the backend at `http://127.0.0.1:8000`. Set `DIASIFT_API_URL` before starting Next.js if the backend runs somewhere else.
+By default, the frontend expects the backend to run at `http://127.0.0.1:8000`.
 
-Data Sources
+## LLM API Setup
 
-The project will use trusted public Type 2 Diabetes guidance sources such as:
+Diasift uses OpenAI by default and automatically retries with Gemini if the OpenAI call fails or returns an incomplete response. API keys are read only by the backend from the project-root `.env` file.
 
-NHS
-NICE
-nidirect
-WHO
+Create a local `.env` file with:
 
-All sources will be recorded in:
+```dotenv
+OPENAI_API_KEY=your-openai-api-key
+GEMINI_API_KEY=your-gemini-api-key
+DIASIFT_OPENAI_MODEL=gpt-5.4-nano
+DIASIFT_GEMINI_MODEL=gemini-2.5-flash
+```
 
-docs/data_sources.md
-Safety Notice
+Do not prefix either key with `NEXT_PUBLIC_`, because API keys must never be exposed to the browser. Do not commit or submit `.env` files containing API keys.
 
-Diasift is not a medical diagnosis tool. It does not provide personal medical advice, medication instructions or emergency support.
+You can also set the keys in your shell instead:
 
-If a user asks a personal or unsafe medical question, the system should refuse to answer directly and recommend speaking to a qualified healthcare professional.
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+export GEMINI_API_KEY="your-api-key"
+```
 
-Planned Development Roadmap
-Document ingestion
-Vector index creation
-Search testing
-Evidence strength labelling
-Unsafe question detection
-Prompt engineering
-LLM answer generation
-FastAPI backend
-Frontend interface
-Evaluation with test questions
-Final project polish
-Author
+After adding or changing a key, restart the FastAPI backend. The frontend does not need an OpenAI key.
+
+## Evaluation
+
+The `evaluation/` folder contains test questions, retrieval evaluation scripts, abstention evaluation scripts, and saved result files.
+
+Useful commands:
+
+```bash
+python evaluation/run_retrieval_eval.py
+python evaluation/run_abstention_eval.py
+```
+
+## Safety Notice
+
+Diasift is not a medical diagnosis tool. It gives general educational information only.
+
+If a question asks for personal diagnosis, medication changes, dosage advice, or urgent medical help, Diasift should refuse to answer directly and recommend speaking to a qualified healthcare professional.
+
+## Author
 
 Oreoluwa Gabriel Sola-Ojo
