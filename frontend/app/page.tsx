@@ -53,7 +53,7 @@ function Hero() {
         <p>
           Search results mix clinical guidance with blogs, forums and ads. DiaSift
           answers your questions using only trusted guidance from the NHS, NICE
-          and WHO &mdash; and shows the evidence behind every answer.
+          and WHO, and shows the evidence behind every answer.
         </p>
 
         <div className="heroActions">

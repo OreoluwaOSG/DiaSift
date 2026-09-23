@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/answer`, {
+    const response = await fetch(`${API_BASE_URL}/feedback`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

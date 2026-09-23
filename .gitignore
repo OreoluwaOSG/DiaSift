@@ -2,6 +2,7 @@ venv/
 __pycache__/
 .env
 data/processed/
+data/feedback.sqlite3
 *.pyc
 .DS_Store
 whattoremember.txt

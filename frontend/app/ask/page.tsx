@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 type ScoreBreakdown = {
   semantic_score: number | null;
@@ -20,6 +20,8 @@ type RetrievedChunk = {
 };
 
 type AnswerResponse = {
+  response_id: string;
+  created_at: string;
   question: string;
   answer: string | null;
   evidence_label: string;
@@ -49,6 +51,24 @@ type HealthResponse = {
   collection_name: string;
   vectorstore_path: string;
   indexed_chunks: number | null;
+};
+
+type FeedbackRating = "helpful" | "not_helpful";
+
+type NegativeFeedbackReason =
+  | "did_not_answer"
+  | "difficult_to_understand"
+  | "information_incorrect"
+  | "sources_not_helpful"
+  | "other";
+
+type FeedbackState = {
+  rating: FeedbackRating | null;
+  reason: NegativeFeedbackReason | null;
+  reasonText: string | null;
+  isSubmitting: boolean;
+  message: string | null;
+  error: string | null;
 };
 
 type ChatMessage =
@@ -83,6 +103,14 @@ const SUGGESTION_POOL = [
   "How often should blood glucose be checked at home?",
   "What role does exercise play in managing type 2 diabetes?",
   "What does the NICE NG28 guideline actually cover?",
+];
+
+const NEGATIVE_REASON_OPTIONS: { value: NegativeFeedbackReason; label: string }[] = [
+  { value: "did_not_answer", label: "It did not answer my question" },
+  { value: "difficult_to_understand", label: "It was difficult to understand" },
+  { value: "information_incorrect", label: "The information seemed incorrect" },
+  { value: "sources_not_helpful", label: "The sources were not helpful" },
+  { value: "other", label: "Other" },
 ];
 
 function getErrorMessage(payload: unknown, fallback: string) {
@@ -181,6 +209,9 @@ export default function AskPage() {
   const [healthError, setHealthError] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
+  const [feedbackByResponseId, setFeedbackByResponseId] = useState<Record<string, FeedbackState>>(
+    {}
+  );
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const hasMessages = messages.length > 0;
 
@@ -286,10 +317,77 @@ export default function AskPage() {
     }
   }
 
+  async function submitFeedback(
+    responseId: string,
+    rating: FeedbackRating,
+    reason?: NegativeFeedbackReason | null,
+    reasonText?: string
+  ) {
+    setFeedbackByResponseId((current) => ({
+      ...current,
+      [responseId]: {
+        rating: current[responseId]?.rating ?? null,
+        reason: current[responseId]?.reason ?? null,
+        reasonText: current[responseId]?.reasonText ?? null,
+        isSubmitting: true,
+        message: null,
+        error: null,
+      },
+    }));
+
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          response_id: responseId,
+          rating,
+          reason: rating === "not_helpful" ? reason ?? null : null,
+          reason_text: rating === "not_helpful" ? reasonText?.trim() || null : null,
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(getErrorMessage(data, "Feedback could not be saved."));
+      }
+
+      setFeedbackByResponseId((current) => ({
+        ...current,
+        [responseId]: {
+          rating,
+          reason: rating === "not_helpful" ? reason ?? null : null,
+          reasonText: rating === "not_helpful" ? reasonText?.trim() || null : null,
+          isSubmitting: false,
+          message: "Feedback saved",
+          error: null,
+        },
+      }));
+    } catch (error) {
+      setFeedbackByResponseId((current) => ({
+        ...current,
+        [responseId]: {
+          rating: current[responseId]?.rating ?? null,
+          reason: current[responseId]?.reason ?? null,
+          reasonText: current[responseId]?.reasonText ?? null,
+          isSubmitting: false,
+          message: null,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while saving feedback.",
+        },
+      }));
+    }
+  }
+
   function startNewChat() {
     setMessages([]);
     setQuestion("");
     setSessionStartedAt(null);
+    setFeedbackByResponseId({});
   }
 
   const headerTitle = hasMessages ? messages[0].content : "Ask something about type 2 diabetes";
@@ -358,7 +456,16 @@ export default function AskPage() {
         <div className="dsTranscriptWrap">
           <ol className="tlList" aria-live="polite">
             {messages.map((message) => (
-              <TimelineItem key={message.id} message={message} />
+              <TimelineItem
+                key={message.id}
+                message={message}
+                feedback={
+                  message.role === "assistant"
+                    ? feedbackByResponseId[message.result.response_id]
+                    : undefined
+                }
+                onFeedbackSubmit={submitFeedback}
+              />
             ))}
 
             {isLoading ? (
@@ -456,7 +563,20 @@ function DossierCard({ label, value, sub }: { label: string; value: string; sub:
   );
 }
 
-function TimelineItem({ message }: { message: ChatMessage }) {
+function TimelineItem({
+  message,
+  feedback,
+  onFeedbackSubmit,
+}: {
+  message: ChatMessage;
+  feedback?: FeedbackState;
+  onFeedbackSubmit: (
+    responseId: string,
+    rating: FeedbackRating,
+    reason?: NegativeFeedbackReason | null,
+    reasonText?: string
+  ) => void;
+}) {
   const time = formatTime(message.createdAt);
 
   if (message.role === "user") {
@@ -516,6 +636,13 @@ function TimelineItem({ message }: { message: ChatMessage }) {
 
         <p className="tlText">{message.content}</p>
 
+        <FeedbackControl
+          feedback={feedback}
+          onSubmit={(rating, reason, reasonText) =>
+            onFeedbackSubmit(message.result.response_id, rating, reason, reasonText)
+          }
+        />
+
         {chips.length ? (
           <div className="sourceChips">
             {chips.map((chip) => (
@@ -555,15 +682,106 @@ function TimelineItem({ message }: { message: ChatMessage }) {
               ))}
             </div>
 
-            <p className="techMeta">
+            {/* <p className="techMeta">
               {message.result.provider} · {message.result.model} ·{" "}
               {message.result.api_called ? "LLM answer" : "Retrieved evidence"}
               {message.result.fallback_used ? " · backup provider used" : ""}
-            </p>
+            </p> */}
           </details>
         ) : null}
       </div>
     </li>
+  );
+}
+
+function FeedbackControl({
+  feedback,
+  onSubmit,
+}: {
+  feedback?: FeedbackState;
+  onSubmit: (
+    rating: FeedbackRating,
+    reason?: NegativeFeedbackReason | null,
+    reasonText?: string
+  ) => void;
+}) {
+  const [showReasons, setShowReasons] = useState(false);
+  const [reason, setReason] = useState<NegativeFeedbackReason | null>(null);
+  const [reasonText, setReasonText] = useState("");
+  const reasonGroupName = useId();
+  const selectedRating = feedback?.rating;
+  const isSubmitting = feedback?.isSubmitting ?? false;
+
+  function submitNegativeFeedback() {
+    onSubmit("not_helpful", reason, reasonText);
+  }
+
+  return (
+    <div className="feedbackPanel" aria-label="Response feedback">
+      <span className="feedbackLabel">Was this useful?</span>
+      <div className="feedbackActions">
+        <button
+          className={`feedbackButton ${selectedRating === "helpful" ? "selected" : ""}`}
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => {
+            setShowReasons(false);
+            onSubmit("helpful");
+          }}
+        >
+          Helpful
+        </button>
+        <button
+          className={`feedbackButton ${selectedRating === "not_helpful" ? "selected" : ""}`}
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => setShowReasons((current) => !current)}
+        >
+          Not Helpful
+        </button>
+      </div>
+
+      {showReasons ? (
+        <div className="feedbackReasons">
+          <div className="reasonOptions">
+            {NEGATIVE_REASON_OPTIONS.map((option) => (
+              <label className="reasonOption" key={option.value}>
+                <input
+                  checked={reason === option.value}
+                  name={reasonGroupName}
+                  type="radio"
+                  value={option.value}
+                  onChange={() => setReason(option.value)}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+
+          {reason === "other" ? (
+            <textarea
+              className="feedbackText"
+              maxLength={500}
+              placeholder="Optional detail"
+              value={reasonText}
+              onChange={(event) => setReasonText(event.target.value)}
+            />
+          ) : null}
+
+          <button
+            className="feedbackSave"
+            type="button"
+            disabled={isSubmitting}
+            onClick={submitNegativeFeedback}
+          >
+            {isSubmitting ? "Saving..." : "Save feedback"}
+          </button>
+        </div>
+      ) : null}
+
+      {feedback?.message ? <p className="feedbackStatus">{feedback.message}</p> : null}
+      {feedback?.error ? <p className="feedbackStatus error">{feedback.error}</p> : null}
+    </div>
   );
 }
 
