@@ -113,6 +113,20 @@ const NEGATIVE_REASON_OPTIONS: { value: NegativeFeedbackReason; label: string }[
   { value: "other", label: "Other" },
 ];
 
+const DEFAULT_DEPLOYED_API_BASE_URL = "https://diasift-api.onrender.com";
+const CONFIGURED_API_BASE_URL = process.env.NEXT_PUBLIC_DIASIFT_API_URL?.trim();
+const API_BASE_URL =
+  CONFIGURED_API_BASE_URL ||
+  (process.env.NODE_ENV === "production" ? DEFAULT_DEPLOYED_API_BASE_URL : "");
+
+function getApiUrl(path: string) {
+  if (!API_BASE_URL) {
+    return `/api${path}`;
+  }
+
+  return `${API_BASE_URL.replace(/\/$/, "")}${path}`;
+}
+
 function getErrorMessage(payload: unknown, fallback: string) {
   if (
     payload &&
@@ -124,6 +138,43 @@ function getErrorMessage(payload: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+async function fetchApiJson<T>(
+  path: string,
+  init: RequestInit | undefined,
+  fallbackError: string
+): Promise<{ data: T; ok: boolean }> {
+  let response: Response;
+
+  try {
+    response = await fetch(getApiUrl(path), init);
+  } catch {
+    throw new Error("Diasift API is not reachable. Please try again shortly.");
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const bodyText = await response.text();
+  let data: unknown = null;
+
+  if (bodyText) {
+    if (!contentType.includes("application/json")) {
+      const readableBody = bodyText.replace(/\s+/g, " ").trim();
+      throw new Error(readableBody || fallbackError);
+    }
+
+    try {
+      data = JSON.parse(bodyText);
+    } catch {
+      throw new Error("Diasift returned a response the app could not read.");
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(data, fallbackError));
+  }
+
+  return { data: data as T, ok: response.ok };
 }
 
 function getSourceTitle(chunk: RetrievedChunk) {
@@ -218,11 +269,14 @@ export default function AskPage() {
   useEffect(() => {
     async function loadHealth() {
       try {
-        const response = await fetch("/api/health");
-        const data = (await response.json()) as HealthResponse;
+        const { data, ok } = await fetchApiJson<HealthResponse>(
+          "/health",
+          undefined,
+          "Backend offline"
+        );
 
         setHealth(data);
-        setHealthError(response.ok ? null : "Backend offline");
+        setHealthError(ok ? null : "Backend offline");
       } catch {
         setHealthError("Backend offline");
       }
@@ -269,23 +323,20 @@ export default function AskPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/answer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { data } = await fetchApiJson<AnswerResponse>(
+        "/answer",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: trimmedQuestion,
+            call_api: true,
+          }),
         },
-        body: JSON.stringify({
-          question: trimmedQuestion,
-          call_api: true,
-        }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data, "Diasift could not answer that question."));
-      }
-
-      const result = data as AnswerResponse;
+        "Diasift could not answer that question."
+      );
 
       setMessages((current) => [
         ...current,
@@ -293,10 +344,10 @@ export default function AskPage() {
           id: crypto.randomUUID(),
           role: "assistant",
           content:
-            result.answer ??
+            data.answer ??
             "I found relevant guidance passages for this question. Review the evidence below.",
           createdAt: Date.now(),
-          result,
+          result: data,
         },
       ]);
     } catch (error) {
@@ -336,23 +387,22 @@ export default function AskPage() {
     }));
 
     try {
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      await fetchApiJson(
+        "/feedback",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            response_id: responseId,
+            rating,
+            reason: rating === "not_helpful" ? reason ?? null : null,
+            reason_text: rating === "not_helpful" ? reasonText?.trim() || null : null,
+          }),
         },
-        body: JSON.stringify({
-          response_id: responseId,
-          rating,
-          reason: rating === "not_helpful" ? reason ?? null : null,
-          reason_text: rating === "not_helpful" ? reasonText?.trim() || null : null,
-        }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data, "Feedback could not be saved."));
-      }
+        "Feedback could not be saved."
+      );
 
       setFeedbackByResponseId((current) => ({
         ...current,

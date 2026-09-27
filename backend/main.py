@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import sqlite3
 import sys
 from typing import Any, Literal
@@ -14,7 +15,19 @@ SCRIPTS_DIR = BASE_DIR / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-DEFAULT_PROVIDER = "openai"
+def get_configured_default_provider() -> Literal["gemini", "openai"]:
+    provider = os.getenv("DIASIFT_LLM_PROVIDER", "openai").strip().lower()
+
+    if provider == "gemini":
+        return "gemini"
+
+    if provider == "openai":
+        return "openai"
+
+    return "openai"
+
+
+DEFAULT_PROVIDER = get_configured_default_provider()
 DEFAULT_MAX_OUTPUT_TOKENS = 800
 
 
@@ -96,9 +109,26 @@ app = FastAPI(
     version="0.1.0",
 )
 
+DEFAULT_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://diasift.vercel.app",
+    "https://diasift-git-cpm-oreoluwasolaojogmailcoms-projects.vercel.app",
+    "https://diasift-git-dev-oreoluwasolaojogmailcoms-projects.vercel.app",
+    "https://diasift-git-capstone-oreoluwasolaojogmailcoms-projects.vercel.app",
+]
+
+CONFIGURED_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("DIASIFT_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://diasift.vercel.app"],
+    allow_origins=DEFAULT_ALLOWED_ORIGINS + CONFIGURED_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
