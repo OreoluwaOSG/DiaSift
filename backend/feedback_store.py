@@ -30,6 +30,9 @@ def get_feedback_db_path() -> Path:
     if configured_path:
         return Path(configured_path).expanduser()
 
+    if os.getenv("RENDER"):
+        return Path("/tmp") / "diasift-feedback.sqlite3"
+
     return DEFAULT_FEEDBACK_DB_PATH
 
 

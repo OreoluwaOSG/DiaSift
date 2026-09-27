@@ -1,10 +1,9 @@
 from pathlib import Path
 from functools import lru_cache
+import os
+import sqlite3
 import sys
 import re
-
-import chromadb
-from sentence_transformers import SentenceTransformer
 
 from evidence_label import label_evidence_strength
 
@@ -18,6 +17,7 @@ VECTORSTORE_DIR = BASE_DIR / "vectorstore"
 # Must match build_index.py.
 COLLECTION_NAME = "diasift_type2_diabetes"
 EMBEDDING_MODEL_NAME = "multi-qa-mpnet-base-dot-v1"
+SEARCH_MODE_ENV_VAR = "DIASIFT_SEARCH_MODE"
 
 STOPWORDS = {
     "a",
@@ -64,6 +64,8 @@ def normalize_question_text(text: str) -> str:
 def get_embedding_model():
     """Load the embedding model once per Python process."""
     try:
+        from sentence_transformers import SentenceTransformer
+
         return SentenceTransformer(EMBEDDING_MODEL_NAME, local_files_only=True)
     except Exception as error:
         raise RuntimeError(
@@ -83,6 +85,8 @@ def load_collection():
             "Run scripts/build_index.py first."
         )
 
+    import chromadb
+
     client = chromadb.PersistentClient(path=str(VECTORSTORE_DIR))
 
     try:
@@ -94,6 +98,80 @@ def load_collection():
         )
 
     return collection
+
+
+@lru_cache(maxsize=1)
+def load_stored_chunks_readonly() -> list[dict]:
+    """Read stored Chroma documents directly from SQLite without opening Chroma."""
+    index_file = VECTORSTORE_DIR / "chroma.sqlite3"
+
+    if not index_file.exists():
+        raise FileNotFoundError(
+            f"Could not find {index_file}. Run scripts/build_index.py first."
+        )
+
+    connection = sqlite3.connect(f"file:{index_file}?mode=ro", uri=True)
+    connection.row_factory = sqlite3.Row
+
+    try:
+        rows = connection.execute(
+            """
+            SELECT
+                e.embedding_id,
+                MAX(CASE WHEN m.key = 'chroma:document' THEN m.string_value END) AS document,
+                MAX(CASE WHEN m.key = 'source' THEN m.string_value END) AS source,
+                MAX(CASE WHEN m.key = 'source_file' THEN m.string_value END) AS source_file,
+                MAX(CASE WHEN m.key = 'chunk_index' THEN m.int_value END) AS chunk_index
+            FROM embeddings e
+            JOIN embedding_metadata m ON m.id = e.id
+            GROUP BY e.id, e.embedding_id
+            ORDER BY e.id
+            """
+        ).fetchall()
+    finally:
+        connection.close()
+
+    chunks = []
+
+    for row in rows:
+        document = row["document"]
+
+        if not document:
+            continue
+
+        chunks.append(
+            {
+                "id": row["embedding_id"],
+                "document": document,
+                "metadata": {
+                    "source": row["source"] or "Unknown source",
+                    "source_file": row["source_file"],
+                    "chunk_index": row["chunk_index"],
+                },
+            }
+        )
+
+    return chunks
+
+
+def get_search_mode() -> str:
+    """
+    Decide which retrieval mode to use.
+
+    Render free instances do not have enough headroom to load the transformer
+    embedding model reliably during live requests, so production defaults to a
+    lightweight lexical search over the stored Chroma documents. Local runs keep
+    semantic search unless DIASIFT_SEARCH_MODE is explicitly set.
+    """
+    configured_mode = os.getenv(SEARCH_MODE_ENV_VAR)
+
+    if configured_mode:
+        return configured_mode.strip().lower()
+
+    if os.getenv("RENDER"):
+        return "lexical"
+
+    return "semantic"
 
 
 def tokenize(text: str) -> set[str]:
@@ -337,12 +415,88 @@ def rerank_results(question: str, results, number_of_results: int):
     return apply_diversity_cap(ranked_results, number_of_results)
 
 
+def build_lexical_candidates(question: str, number_of_results: int) -> dict:
+    """
+    Build Chroma-like candidate results without loading the embedding model.
+
+    The downstream reranker expects the same shape as collection.query(), so this
+    function gathers stored documents and orders them with cheap term/intent
+    signals before passing them through the shared reranker.
+    """
+    stored_chunks = load_stored_chunks_readonly()
+
+    normalized_question = normalize_question_text(question)
+    query_terms = tokenize(normalized_question)
+    wants_definition = is_definition_question(normalized_question)
+    definition_target = (
+        get_definition_target(normalized_question) if wants_definition else None
+    )
+
+    scored_candidates = []
+
+    for chunk in stored_chunks:
+        document = chunk["document"]
+        document_terms = tokenize(document)
+        matching_terms = query_terms.intersection(document_terms)
+        lexical_score = len(matching_terms) / max(len(query_terms), 1)
+        intent_score = (
+            calculate_definition_score(document, definition_target)
+            if wants_definition
+            else 0
+        )
+
+        scored_candidates.append(
+            {
+                "id": chunk["id"],
+                "document": document,
+                "metadata": chunk["metadata"],
+                "score": lexical_score + intent_score,
+            }
+        )
+
+    scored_candidates.sort(key=lambda item: item["score"], reverse=True)
+
+    candidate_count = min(max(number_of_results * 6, 25), len(scored_candidates))
+    candidates = scored_candidates[:candidate_count]
+
+    if not candidates:
+        return {"ids": [[]], "documents": [[]], "metadatas": [[]], "distances": [[]]}
+
+    return {
+        "ids": [[candidate["id"] for candidate in candidates]],
+        "documents": [[candidate["document"] for candidate in candidates]],
+        "metadatas": [[candidate["metadata"] for candidate in candidates]],
+        "distances": [[1 - candidate["score"] for candidate in candidates]],
+    }
+
+
+def search_documents_lexical(
+    question: str,
+    number_of_results: int = 5,
+    verbose: bool = True,
+):
+    """Search stored chunks without loading the transformer embedding model."""
+    if verbose:
+        print("Searching stored chunks with lexical retrieval...")
+
+    results = build_lexical_candidates(question, number_of_results)
+    return rerank_results(question, results, number_of_results)
+
+
 def search_documents(question: str, number_of_results: int = 5, verbose: bool = True):
     """
     1. Turn the user's question into an embedding.
     2. Search ChromaDB for similar chunks.
     3. Rerank the results.
     """
+    search_mode = get_search_mode()
+
+    if search_mode == "lexical":
+        return search_documents_lexical(
+            question=question,
+            number_of_results=number_of_results,
+            verbose=verbose,
+        )
 
     if verbose:
         print("Loading embedding model...")
