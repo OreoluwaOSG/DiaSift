@@ -45,7 +45,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -473,6 +474,125 @@ button {
   color: var(--muted-warm);
   font-family: var(--mono);
   font-size: 0.72rem;
+}
+
+.feedbackPanel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-warm);
+}
+
+.feedbackLabel {
+  color: var(--muted-warm);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feedbackActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedbackButton,
+.feedbackSave {
+  border: 1px solid var(--line-warm);
+  background: var(--paper-card);
+  color: var(--forest);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.feedbackButton {
+  padding: 7px 11px;
+  border-radius: 18px;
+}
+
+.feedbackButton:hover,
+.feedbackButton.selected,
+.feedbackSave:hover {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--white);
+}
+
+.feedbackButton:disabled,
+.feedbackSave:disabled {
+  cursor: not-allowed;
+  border-color: var(--line-warm);
+  background: var(--forest-soft);
+  color: var(--muted-warm);
+}
+
+.feedbackReasons {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.reasonOptions {
+  display: grid;
+  gap: 8px;
+}
+
+.reasonOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-warm);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.reasonOption input {
+  accent-color: var(--forest);
+}
+
+.feedbackText {
+  min-height: 76px;
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--line-warm);
+  outline: none;
+  background: var(--paper-card);
+  color: var(--ink-warm);
+  font-family: var(--serif);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.feedbackText:focus {
+  border-color: var(--forest);
+}
+
+.feedbackSave {
+  align-self: flex-start;
+  padding: 8px 12px;
+  border-radius: 0;
+}
+
+.feedbackStatus {
+  margin: 0;
+  color: var(--forest);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.feedbackStatus.error {
+  color: var(--rust);
 }
 
 .evidenceDrawer {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 type ScoreBreakdown = {
   semantic_score: number | null;
@@ -20,6 +20,8 @@ type RetrievedChunk = {
 };
 
 type AnswerResponse = {
+  response_id: string;
+  created_at: string;
   question: string;
   answer: string | null;
   evidence_label: string;
@@ -37,6 +39,7 @@ type AnswerResponse = {
   provider: string;
   model: string;
   api_called: boolean;
+  fallback_used: boolean;
   usage_estimate: {
     input_tokens: number;
     max_output_tokens: number;
@@ -48,6 +51,24 @@ type HealthResponse = {
   collection_name: string;
   vectorstore_path: string;
   indexed_chunks: number | null;
+};
+
+type FeedbackRating = "helpful" | "not_helpful";
+
+type NegativeFeedbackReason =
+  | "did_not_answer"
+  | "difficult_to_understand"
+  | "information_incorrect"
+  | "sources_not_helpful"
+  | "other";
+
+type FeedbackState = {
+  rating: FeedbackRating | null;
+  reason: NegativeFeedbackReason | null;
+  reasonText: string | null;
+  isSubmitting: boolean;
+  message: string | null;
+  error: string | null;
 };
 
 type ChatMessage =
@@ -84,6 +105,28 @@ const SUGGESTION_POOL = [
   "What does the NICE NG28 guideline actually cover?",
 ];
 
+const NEGATIVE_REASON_OPTIONS: { value: NegativeFeedbackReason; label: string }[] = [
+  { value: "did_not_answer", label: "It did not answer my question" },
+  { value: "difficult_to_understand", label: "It was difficult to understand" },
+  { value: "information_incorrect", label: "The information seemed incorrect" },
+  { value: "sources_not_helpful", label: "The sources were not helpful" },
+  { value: "other", label: "Other" },
+];
+
+const DEFAULT_DEPLOYED_API_BASE_URL = "https://diasift-api.onrender.com";
+const CONFIGURED_API_BASE_URL = process.env.NEXT_PUBLIC_DIASIFT_API_URL?.trim();
+const API_BASE_URL =
+  CONFIGURED_API_BASE_URL ||
+  (process.env.NODE_ENV === "production" ? DEFAULT_DEPLOYED_API_BASE_URL : "");
+
+function getApiUrl(path: string) {
+  if (!API_BASE_URL) {
+    return `/api${path}`;
+  }
+
+  return `${API_BASE_URL.replace(/\/$/, "")}${path}`;
+}
+
 function getErrorMessage(payload: unknown, fallback: string) {
   if (
     payload &&
@@ -95,6 +138,43 @@ function getErrorMessage(payload: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+async function fetchApiJson<T>(
+  path: string,
+  init: RequestInit | undefined,
+  fallbackError: string
+): Promise<{ data: T; ok: boolean }> {
+  let response: Response;
+
+  try {
+    response = await fetch(getApiUrl(path), init);
+  } catch {
+    throw new Error("Diasift API is not reachable. Please try again shortly.");
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const bodyText = await response.text();
+  let data: unknown = null;
+
+  if (bodyText) {
+    if (!contentType.includes("application/json")) {
+      const readableBody = bodyText.replace(/\s+/g, " ").trim();
+      throw new Error(readableBody || fallbackError);
+    }
+
+    try {
+      data = JSON.parse(bodyText);
+    } catch {
+      throw new Error("Diasift returned a response the app could not read.");
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(data, fallbackError));
+  }
+
+  return { data: data as T, ok: response.ok };
 }
 
 function getSourceTitle(chunk: RetrievedChunk) {
@@ -180,17 +260,23 @@ export default function AskPage() {
   const [healthError, setHealthError] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
+  const [feedbackByResponseId, setFeedbackByResponseId] = useState<Record<string, FeedbackState>>(
+    {}
+  );
   const transcriptEndRef = useRef<HTMLDivElement | null>(null);
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
     async function loadHealth() {
       try {
-        const response = await fetch("/api/health");
-        const data = (await response.json()) as HealthResponse;
+        const { data, ok } = await fetchApiJson<HealthResponse>(
+          "/health",
+          undefined,
+          "Backend offline"
+        );
 
         setHealth(data);
-        setHealthError(response.ok ? null : "Backend offline");
+        setHealthError(ok ? null : "Backend offline");
       } catch {
         setHealthError("Backend offline");
       }
@@ -237,25 +323,20 @@ export default function AskPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/answer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { data } = await fetchApiJson<AnswerResponse>(
+        "/answer",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: trimmedQuestion,
+            call_api: true,
+          }),
         },
-        body: JSON.stringify({
-          question: trimmedQuestion,
-          provider: "gemini",
-          call_api: true,
-          max_output_tokens: 500,
-        }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data, "Diasift could not answer that question."));
-      }
-
-      const result = data as AnswerResponse;
+        "Diasift could not answer that question."
+      );
 
       setMessages((current) => [
         ...current,
@@ -263,10 +344,10 @@ export default function AskPage() {
           id: crypto.randomUUID(),
           role: "assistant",
           content:
-            result.answer ??
+            data.answer ??
             "I found relevant guidance passages for this question. Review the evidence below.",
           createdAt: Date.now(),
-          result,
+          result: data,
         },
       ]);
     } catch (error) {
@@ -287,10 +368,76 @@ export default function AskPage() {
     }
   }
 
+  async function submitFeedback(
+    responseId: string,
+    rating: FeedbackRating,
+    reason?: NegativeFeedbackReason | null,
+    reasonText?: string
+  ) {
+    setFeedbackByResponseId((current) => ({
+      ...current,
+      [responseId]: {
+        rating: current[responseId]?.rating ?? null,
+        reason: current[responseId]?.reason ?? null,
+        reasonText: current[responseId]?.reasonText ?? null,
+        isSubmitting: true,
+        message: null,
+        error: null,
+      },
+    }));
+
+    try {
+      await fetchApiJson(
+        "/feedback",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            response_id: responseId,
+            rating,
+            reason: rating === "not_helpful" ? reason ?? null : null,
+            reason_text: rating === "not_helpful" ? reasonText?.trim() || null : null,
+          }),
+        },
+        "Feedback could not be saved."
+      );
+
+      setFeedbackByResponseId((current) => ({
+        ...current,
+        [responseId]: {
+          rating,
+          reason: rating === "not_helpful" ? reason ?? null : null,
+          reasonText: rating === "not_helpful" ? reasonText?.trim() || null : null,
+          isSubmitting: false,
+          message: "Feedback saved",
+          error: null,
+        },
+      }));
+    } catch (error) {
+      setFeedbackByResponseId((current) => ({
+        ...current,
+        [responseId]: {
+          rating: current[responseId]?.rating ?? null,
+          reason: current[responseId]?.reason ?? null,
+          reasonText: current[responseId]?.reasonText ?? null,
+          isSubmitting: false,
+          message: null,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while saving feedback.",
+        },
+      }));
+    }
+  }
+
   function startNewChat() {
     setMessages([]);
     setQuestion("");
     setSessionStartedAt(null);
+    setFeedbackByResponseId({});
   }
 
   const headerTitle = hasMessages ? messages[0].content : "Ask something about type 2 diabetes";
@@ -359,7 +506,16 @@ export default function AskPage() {
         <div className="dsTranscriptWrap">
           <ol className="tlList" aria-live="polite">
             {messages.map((message) => (
-              <TimelineItem key={message.id} message={message} />
+              <TimelineItem
+                key={message.id}
+                message={message}
+                feedback={
+                  message.role === "assistant"
+                    ? feedbackByResponseId[message.result.response_id]
+                    : undefined
+                }
+                onFeedbackSubmit={submitFeedback}
+              />
             ))}
 
             {isLoading ? (
@@ -457,7 +613,20 @@ function DossierCard({ label, value, sub }: { label: string; value: string; sub:
   );
 }
 
-function TimelineItem({ message }: { message: ChatMessage }) {
+function TimelineItem({
+  message,
+  feedback,
+  onFeedbackSubmit,
+}: {
+  message: ChatMessage;
+  feedback?: FeedbackState;
+  onFeedbackSubmit: (
+    responseId: string,
+    rating: FeedbackRating,
+    reason?: NegativeFeedbackReason | null,
+    reasonText?: string
+  ) => void;
+}) {
   const time = formatTime(message.createdAt);
 
   if (message.role === "user") {
@@ -517,6 +686,13 @@ function TimelineItem({ message }: { message: ChatMessage }) {
 
         <p className="tlText">{message.content}</p>
 
+        <FeedbackControl
+          feedback={feedback}
+          onSubmit={(rating, reason, reasonText) =>
+            onFeedbackSubmit(message.result.response_id, rating, reason, reasonText)
+          }
+        />
+
         {chips.length ? (
           <div className="sourceChips">
             {chips.map((chip) => (
@@ -556,14 +732,106 @@ function TimelineItem({ message }: { message: ChatMessage }) {
               ))}
             </div>
 
-            <p className="techMeta">
+            {/* <p className="techMeta">
               {message.result.provider} · {message.result.model} ·{" "}
               {message.result.api_called ? "LLM answer" : "Retrieved evidence"}
-            </p>
+              {message.result.fallback_used ? " · backup provider used" : ""}
+            </p> */}
           </details>
         ) : null}
       </div>
     </li>
+  );
+}
+
+function FeedbackControl({
+  feedback,
+  onSubmit,
+}: {
+  feedback?: FeedbackState;
+  onSubmit: (
+    rating: FeedbackRating,
+    reason?: NegativeFeedbackReason | null,
+    reasonText?: string
+  ) => void;
+}) {
+  const [showReasons, setShowReasons] = useState(false);
+  const [reason, setReason] = useState<NegativeFeedbackReason | null>(null);
+  const [reasonText, setReasonText] = useState("");
+  const reasonGroupName = useId();
+  const selectedRating = feedback?.rating;
+  const isSubmitting = feedback?.isSubmitting ?? false;
+
+  function submitNegativeFeedback() {
+    onSubmit("not_helpful", reason, reasonText);
+  }
+
+  return (
+    <div className="feedbackPanel" aria-label="Response feedback">
+      <span className="feedbackLabel">Was this useful?</span>
+      <div className="feedbackActions">
+        <button
+          className={`feedbackButton ${selectedRating === "helpful" ? "selected" : ""}`}
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => {
+            setShowReasons(false);
+            onSubmit("helpful");
+          }}
+        >
+          Helpful
+        </button>
+        <button
+          className={`feedbackButton ${selectedRating === "not_helpful" ? "selected" : ""}`}
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => setShowReasons((current) => !current)}
+        >
+          Not Helpful
+        </button>
+      </div>
+
+      {showReasons ? (
+        <div className="feedbackReasons">
+          <div className="reasonOptions">
+            {NEGATIVE_REASON_OPTIONS.map((option) => (
+              <label className="reasonOption" key={option.value}>
+                <input
+                  checked={reason === option.value}
+                  name={reasonGroupName}
+                  type="radio"
+                  value={option.value}
+                  onChange={() => setReason(option.value)}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
+
+          {reason === "other" ? (
+            <textarea
+              className="feedbackText"
+              maxLength={500}
+              placeholder="Optional detail"
+              value={reasonText}
+              onChange={(event) => setReasonText(event.target.value)}
+            />
+          ) : null}
+
+          <button
+            className="feedbackSave"
+            type="button"
+            disabled={isSubmitting}
+            onClick={submitNegativeFeedback}
+          >
+            {isSubmitting ? "Saving..." : "Save feedback"}
+          </button>
+        </div>
+      ) : null}
+
+      {feedback?.message ? <p className="feedbackStatus">{feedback.message}</p> : null}
+      {feedback?.error ? <p className="feedbackStatus error">{feedback.error}</p> : null}
+    </div>
   );
 }
 

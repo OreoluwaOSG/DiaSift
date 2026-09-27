@@ -95,4 +95,8 @@ Instructions:
 - Do not add medical information that is not in the retrieved context.
 - Do not diagnose or give personal treatment advice.
 - Include citations using the source names.
+- Keep the answer between 120 and 180 words unless the evidence requires a shorter answer.
+- Use concise, complete sentences and no more than two short paragraphs.
+- Do not add a heading or repeat the evidence-strength label as a heading.
+- Finish the final sentence before stopping.
 """.strip()

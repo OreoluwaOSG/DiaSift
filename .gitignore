@@ -2,12 +2,12 @@ venv/
 __pycache__/
 .env
 data/processed/
+data/feedback.sqlite3
 *.pyc
 .DS_Store
 whattoremember.txt
 frontend/dist/
 backend/__pycache__/
-.claude
 frontend/node_modules/
 frontend/.next/
 backend-venv/
